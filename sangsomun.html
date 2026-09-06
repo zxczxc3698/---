@@ -1,0 +1,582 @@
+<title>제갈량 상소문</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Nanum+Myeongjo:wght@400;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:      #ded2b8;
+    --paper-lift: #ebe1ca;
+    --paper-deep: #d2c4a6;
+    --ink:        #1f1b16;
+    --ink-soft:   #4a4137;
+    --ink-faint:  #7d7059;
+    --rule:       #c1b092;
+    --rule-soft:  #cdbfa3;
+    --cinnabar:   #a8232a;
+    --cinnabar-2: #8e1c22;
+    --seal-ink:   #ffffff;
+    --shadow: 0 1px 0 rgba(255,252,244,.5), 0 18px 44px -28px rgba(31,27,22,.55);
+    --brush: "Ma Shan Zheng", "Nanum Myeongjo", serif;
+    --serif: "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
+    --sans:  "IBM Plex Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+    --measure: 34rem;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:      #14120e;
+      --paper-lift: #1e1b14;
+      --paper-deep: #100e0a;
+      --ink:        #ddd0b3;
+      --ink-soft:   #a89a7d;
+      --ink-faint:  #776c56;
+      --rule:       #3d3527;
+      --rule-soft:  #2e2820;
+      --cinnabar:   #cf5254;
+      --cinnabar-2: #b03f43;
+      --seal-ink:   #171410;
+      --shadow: 0 1px 0 rgba(255,240,214,.05), 0 22px 50px -30px #000;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:      #14120e;
+    --paper-lift: #1e1b14;
+    --paper-deep: #100e0a;
+    --ink:        #ddd0b3;
+    --ink-soft:   #a89a7d;
+    --ink-faint:  #776c56;
+    --rule:       #3d3527;
+    --rule-soft:  #2e2820;
+    --cinnabar:   #cf5254;
+    --cinnabar-2: #b03f43;
+    --seal-ink:   #171410;
+    --shadow: 0 1px 0 rgba(255,240,214,.05), 0 22px 50px -30px #000;
+  }
+
+  *{ box-sizing:border-box }
+  body{
+    margin:0;
+    background:var(--paper-deep);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:16px;
+    line-height:1.95;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--cinnabar); color:#fff }
+  :focus-visible{ outline:2px solid var(--cinnabar); outline-offset:3px }
+
+  .scroll{
+    max-width:56rem;
+    margin:0 auto;
+    background:var(--paper);
+    background-image:
+      repeating-linear-gradient(90deg, rgba(120,104,74,.045) 0 1px, transparent 1px 7px),
+      repeating-linear-gradient(0deg,  rgba(120,104,74,.030) 0 1px, transparent 1px 11px),
+      radial-gradient(120% 60% at 12% 0%,  rgba(160,138,96,.16), transparent 60%),
+      radial-gradient(100% 55% at 88% 100%, rgba(140,118,80,.14), transparent 62%);
+    border-left:1px solid var(--rule-soft);
+    border-right:1px solid var(--rule-soft);
+    box-shadow:var(--shadow);
+    padding:0 clamp(1.25rem, 5vw, 4.5rem) 5rem;
+    position:relative;
+  }
+  .scroll::before,.scroll::after{
+    content:""; position:absolute; inset-inline:0; height:14px;
+    background:linear-gradient(var(--paper-deep), transparent);
+    opacity:.5;
+  }
+  .scroll::before{ top:0 }
+  .scroll::after{ bottom:0; transform:rotate(180deg) }
+
+  /* ── 표제 ───────────────────────────── */
+  header.biao{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:clamp(1rem,4vw,2.5rem);
+    align-items:start;
+    padding:clamp(2.5rem,7vw,4.5rem) 0 2rem;
+    border-bottom:2px solid var(--ink);
+    position:relative;
+  }
+  header.biao::after{
+    content:""; position:absolute; left:0; right:0; bottom:-6px;
+    border-bottom:1px solid var(--rule);
+  }
+  .eyebrow{
+    font-family:var(--sans); font-size:.68rem; font-weight:600;
+    letter-spacing:.34em; text-transform:uppercase;
+    color:var(--cinnabar); margin:0 0 1.1rem;
+  }
+  h1.title{
+    font-family:var(--serif); font-weight:800;
+    font-size:clamp(2.3rem,7.5vw,4.1rem);
+    line-height:1.08; letter-spacing:-.02em;
+    margin:0; text-wrap:balance;
+  }
+  h1.title small{
+    display:block; font-family:var(--brush); font-weight:400;
+    font-size:.42em; letter-spacing:.28em; color:var(--ink-soft);
+    margin-top:.55rem;
+  }
+  .dateline{
+    font-family:var(--sans); font-size:.8rem; color:var(--ink-soft);
+    margin:1.6rem 0 0; display:flex; flex-wrap:wrap; gap:.45rem 1.1rem;
+    align-items:center;
+  }
+  .dateline .gan{ font-family:var(--brush); font-size:1.15rem; color:var(--ink); letter-spacing:.12em }
+  .dateline .dot{ color:var(--rule) }
+
+  .vcol{
+    display:flex; flex-direction:column; align-items:center;
+    font-family:var(--brush); line-height:1.14; padding-top:.3rem;
+  }
+  .vcol.big{ font-size:clamp(1.35rem,3.6vw,1.8rem); color:var(--ink) }
+  .vcol.dim{ font-size:.82rem; color:var(--ink-faint); padding-top:.5rem }
+
+  /* ── 인장 ───────────────────────────── */
+  .seal{
+    width:74px; height:74px; flex:none;
+    display:grid; grid-template-columns:1fr 1fr; place-items:center;
+    background:var(--cinnabar); color:var(--seal-ink);
+    font-family:var(--brush); font-size:1.35rem; line-height:1;
+    border:3px solid var(--cinnabar-2); border-radius:3px;
+    transform:rotate(-4deg);
+    box-shadow:inset 0 0 12px rgba(0,0,0,.22);
+    animation:stamp .7s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .seal span{ padding:.1em }
+  @keyframes stamp{
+    from{ opacity:0; transform:rotate(-4deg) scale(1.5) }
+    to  { opacity:1; transform:rotate(-4deg) scale(1) }
+  }
+  @media (prefers-reduced-motion:reduce){ .seal{ animation:none } }
+
+  /* ── 서문 ───────────────────────────── */
+  .preface{
+    max-width:var(--measure);
+    margin:2.6rem 0 0;
+    font-size:1.06rem; color:var(--ink-soft);
+  }
+  .preface::first-letter{
+    font-family:var(--brush); font-size:2.9em; float:left;
+    line-height:.86; padding:.06em .18em 0 0; color:var(--cinnabar);
+  }
+
+  /* ── 편(篇) ─────────────────────────── */
+  .pian{ padding-top:clamp(3rem,7vw,4.5rem) }
+  .pian-head{
+    display:grid; grid-template-columns:auto 1fr; gap:1.4rem;
+    align-items:baseline; padding-bottom:1.1rem;
+    border-bottom:1px solid var(--ink);
+  }
+  .pian-mark{
+    font-family:var(--brush); font-size:clamp(2rem,6vw,2.9rem);
+    color:var(--cinnabar); line-height:1; letter-spacing:.1em;
+  }
+  .pian-head h2{
+    margin:0; font-size:clamp(1.35rem,4vw,1.85rem);
+    font-weight:800; letter-spacing:-.01em; text-wrap:balance;
+  }
+  .pian-head h2 em{
+    display:block; font-style:normal; font-family:var(--sans);
+    font-size:.62rem; font-weight:500; letter-spacing:.26em;
+    color:var(--ink-faint); margin-top:.5rem; text-transform:uppercase;
+  }
+  .pian-lede{
+    max-width:var(--measure); margin:1.7rem 0 0;
+    font-size:1.02rem; color:var(--ink-soft);
+    border-left:3px solid var(--cinnabar); padding-left:1.1rem;
+  }
+
+  /* ── 조목 ───────────────────────────── */
+  .clauses{ display:flex; flex-direction:column; gap:2.6rem; margin-top:2.6rem }
+  .clause{ display:grid; grid-template-columns:5.5rem minmax(0,1fr); gap:1.6rem }
+  .clause-rail{ display:flex; flex-direction:column; align-items:flex-end; gap:.9rem; padding-top:.15rem }
+  .clause-num{
+    font-family:var(--brush); font-size:1.7rem; line-height:1;
+    color:var(--ink); border-bottom:2px solid var(--cinnabar); padding-bottom:.18rem;
+  }
+  .clause-note{
+    display:flex; flex-direction:column; align-items:center;
+    font-family:var(--brush); font-size:1rem; line-height:1.28;
+    color:var(--cinnabar); opacity:.85;
+  }
+  .clause h3{
+    margin:0 0 .7rem; font-size:1.13rem; font-weight:700;
+    letter-spacing:-.005em; text-wrap:balance;
+  }
+  .clause p{ margin:0 0 .95rem; max-width:var(--measure) }
+  .clause p:last-child{ margin-bottom:0 }
+  .clause strong{ font-weight:800; color:var(--ink); box-shadow:inset 0 -.42em 0 rgba(168,35,42,.14) }
+
+  .coda{
+    margin:2.8rem 0 0; padding:1.3rem 1.5rem;
+    background:var(--paper-lift); border:1px solid var(--rule-soft);
+    max-width:var(--measure); font-size:1rem; color:var(--ink-soft);
+  }
+  .coda b{ font-family:var(--brush); color:var(--cinnabar); font-weight:400; font-size:1.2em; letter-spacing:.14em }
+
+  /* ── 결어 ───────────────────────────── */
+  .closing{
+    margin-top:clamp(3.5rem,8vw,5.5rem); padding-top:2.2rem;
+    border-top:2px solid var(--ink); position:relative;
+  }
+  .closing::before{
+    content:""; position:absolute; top:6px; left:0; right:0; border-top:1px solid var(--rule);
+  }
+  .closing p{ max-width:var(--measure); margin:0 0 1rem; font-size:1.04rem }
+  .signoff{
+    display:flex; flex-wrap:wrap; align-items:center; gap:1.2rem;
+    margin-top:2rem; padding-top:1.4rem; border-top:1px dashed var(--rule);
+  }
+  .signoff .han{ font-family:var(--brush); font-size:1.5rem; letter-spacing:.2em; color:var(--ink) }
+  .signoff .who{ font-family:var(--sans); font-size:.78rem; letter-spacing:.16em; color:var(--ink-faint) }
+
+  /* ── 하문 ───────────────────────────── */
+  .xiawen{ margin-top:clamp(3.5rem,8vw,5rem) }
+  .panel-head{
+    display:flex; align-items:baseline; gap:.9rem;
+    border-bottom:1px solid var(--ink); padding-bottom:.7rem; margin-bottom:1.4rem;
+  }
+  .panel-head .han{ font-family:var(--brush); font-size:1.6rem; color:var(--cinnabar); letter-spacing:.14em }
+  .panel-head h2{ margin:0; font-size:1.05rem; font-weight:700 }
+  .panel-head .hint{ margin-left:auto; font-family:var(--sans); font-size:.72rem; color:var(--ink-faint) }
+  .ask-row{ display:flex; flex-wrap:wrap; gap:.75rem; align-items:stretch }
+  textarea#q{
+    flex:1 1 20rem; min-height:5.2rem; resize:vertical;
+    font-family:var(--serif); font-size:1rem; line-height:1.7; color:var(--ink);
+    background:var(--paper-lift); border:1px solid var(--rule);
+    padding:.85rem 1rem;
+  }
+  textarea#q::placeholder{ color:var(--ink-faint) }
+  button{
+    font-family:var(--sans); font-size:.82rem; font-weight:600; letter-spacing:.1em;
+    color:#fff; background:var(--cinnabar); border:1px solid var(--cinnabar-2);
+    padding:.85rem 1.4rem; cursor:pointer; transition:background .15s;
+    align-self:stretch; min-width:8.5rem;
+  }
+  button:hover:not(:disabled){ background:var(--cinnabar-2) }
+  button:disabled{ opacity:.5; cursor:progress }
+  .answer{
+    margin-top:1.4rem; padding:1.3rem 1.5rem; max-width:var(--measure);
+    background:var(--paper-lift); border:1px solid var(--rule-soft);
+    border-left:3px solid var(--cinnabar);
+    white-space:pre-wrap; font-size:1.02rem; color:var(--ink-soft);
+  }
+  .answer[hidden]{ display:none }
+
+  /* ── 역대 상소문 ─────────────────────── */
+  .archive{ margin-top:clamp(3rem,7vw,4.5rem) }
+  .archive-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column }
+  .archive-list li{ border-bottom:1px solid var(--rule-soft) }
+  .archive-list button{
+    width:100%; background:none; border:0; color:var(--ink);
+    display:grid; grid-template-columns:auto 1fr auto; gap:1rem; align-items:baseline;
+    padding:.85rem .2rem; text-align:left; font-family:var(--serif); font-size:.98rem;
+    font-weight:400; letter-spacing:0;
+  }
+  .archive-list button:hover{ background:var(--paper-lift) }
+  .archive-list .gan{ font-family:var(--brush); font-size:1.05rem; letter-spacing:.1em; color:var(--cinnabar) }
+  .archive-list .iso{ font-family:var(--sans); font-size:.72rem; color:var(--ink-faint); font-variant-numeric:tabular-nums }
+  .archive-empty{ font-family:var(--sans); font-size:.82rem; color:var(--ink-faint); margin:0; padding:.9rem 0 }
+
+  @media (max-width:640px){
+    .clause{ grid-template-columns:1fr; gap:.7rem }
+    .clause-rail{ flex-direction:row; align-items:center; gap:.9rem }
+    .clause-note{ flex-direction:row; gap:.1em; font-size:1.05rem }
+    header.biao{ grid-template-columns:1fr }
+    .vcol{ flex-direction:row; gap:.16em; padding-top:0; align-items:center }
+    .vcol.dim{ padding-top:0 }
+  }
+</style>
+
+<div class="scroll">
+  <header class="biao">
+    <div>
+      <p class="eyebrow">丞相 上疏 · 每朝 七時</p>
+      <h1 class="title">제갈량 상소문<small>諸 葛 亮 上 疏</small></h1>
+      <p class="dateline">
+        <span class="gan" id="gan">丙午年 九月 初六日</span>
+        <span class="dot">·</span>
+        <span id="iso">2026-09-06</span>
+        <span class="dot">·</span>
+        <span id="src">오늘의 표문</span>
+      </p>
+    </div>
+    <div style="display:flex;gap:1.1rem;align-items:flex-start">
+      <div class="vcol big"><span>臣</span><span>亮</span><span>言</span></div>
+      <div class="vcol dim"><span>頓</span><span>首</span><span>死</span><span>罪</span></div>
+      <div class="seal" aria-label="제갈공명 인장"><span>諸</span><span>葛</span><span>孔</span><span>明</span></div>
+    </div>
+  </header>
+
+  <main id="body"></main>
+
+  <section class="xiawen">
+    <div class="panel-head">
+      <span class="han">下問</span>
+      <h2>승상께 여쭈다</h2>
+      <span class="hint" id="askHint">폐하의 물음을 적으시옵소서</span>
+    </div>
+    <div class="ask-row">
+      <textarea id="q" placeholder="예 — 지금 벌여 둔 일이 셋인데 어느 것부터 접어야 하겠소?"></textarea>
+      <button id="askBtn" type="button">여쭙기</button>
+    </div>
+    <div class="answer" id="a" hidden></div>
+  </section>
+
+  <section class="archive">
+    <div class="panel-head">
+      <span class="han">歷代</span>
+      <h2>역대 상소문</h2>
+      <span class="hint">매일 오전 일곱 시에 한 통씩 쌓이옵니다</span>
+    </div>
+    <ul class="archive-list" id="arch"></ul>
+    <p class="archive-empty" id="archEmpty">아직 올린 표문은 오늘 것뿐이옵니다.</p>
+  </section>
+</div>
+
+<script>
+/* ── 오늘의 표문 ───────────────────────────────────────────── */
+const TODAY = {
+  date: "2026-09-06",
+  gan: "丙午年 九月 初六日",
+  preface: "신 량이 아뢰옵나이다. 폐하께서 오늘 신에게 처음으로 말을 거시었으니, 신은 아직 폐하의 형세도 뜻도 다 알지 못하옵니다. 하오나 선제께서 초려를 찾으셨을 적에도 신은 선제의 곳간이 얼마인지 병졸이 몇인지 알지 못한 채 천하를 논하였나이다. 형세를 모른다 하여 입을 다무는 것은 신하의 도리가 아니옵기로, 먼저 큰 줄기를 아뢰고 조목은 날마다 고쳐 나가겠나이다. 폐하께서 신에게 이르시는 말씀이 쌓일수록 이 표문은 점점 폐하 한 분만을 위한 글이 될 것이옵니다.",
+  parts: [
+    {
+      mark: "其一",
+      title: "도구를 부리는 법",
+      sub: "On wielding the instrument",
+      lede: "폐하께서 신묘한 기물 하나를 얻으시어 곁에 두셨으니, 세상이 이를 일러 클로드 코드라 하옵니다. 이 물건은 창칼처럼 날카로우나 창칼과 달라, 쥐는 법을 모르는 자가 잡으면 제 손을 베고, 부리는 법을 아는 자가 잡으면 만 명의 서기를 부리는 것과 같사옵니다. 무릇 병(兵)이란 이로운 기물을 얻는 데 있지 아니하고 그것을 다스리는 법도에 있었사오니, 여덟 조목으로 나누어 아뢰겠나이다.",
+      clauses: [
+        { n:"一", note:"先立法度", h:"먼저 군율을 세우소서",
+          p:["군사를 일으키기 전에 군율부터 세우는 것이 장수의 도리이옵니다. 진영 문 앞에 <strong>CLAUDE.md 한 장</strong>을 세워 이 나라의 말투와 법도와 금기를 적어 두시옵소서. 어느 명으로 시험을 돌리는지, 어느 성벽은 손대서는 아니 되는지, 어떤 문체로 글을 짓는지를 미리 적어 두시면 신은 매번 여쭙지 않고도 폐하의 뜻을 알 수 있사옵니다.",
+              "같은 말씀을 세 번 이르셨다면 그것은 이미 법도이옵니다. 세 번째부터는 말로 이르지 마시고 글로 적으시옵소서. <strong>말은 흩어지나 글은 남사옵니다.</strong>"] },
+        { n:"二", note:"先陣後戰", h:"진을 친 뒤에 싸우소서",
+          p:["신이 가장 두려워하는 것은 강한 적이 아니라 계책 없이 나아가는 아군이옵니다. 큰 일을 맡기실 적에는 곧바로 칼을 뽑게 하지 마시고, 먼저 지형을 살펴 계책을 아뢰게 하시옵소서. <strong>계획을 먼저 세우게 하여 그 계책이 폐하의 뜻과 맞는지를 보신 뒤에</strong> 비로소 움직이라 명하시면, 열 번 고쳐 쓸 일을 한 번에 마칠 수 있사옵니다.",
+              "어긋난 방향으로 달리는 준마는 느린 노새만도 못하옵니다. 신이 빨리 달릴수록 폐하께서는 방향을 먼저 보셔야 하옵니다."] },
+        { n:"三", note:"淸帳", h:"군막을 자주 정비하소서",
+          p:["장수의 군막에 문서가 쌓이면 급한 전령이 와도 그 뜻이 묻히옵니다. 한 가지 일을 마치셨거든 자리를 걷고 새 자리를 펴시옵소서. 어제의 논의가 오늘의 판단을 흐리게 하는 일이 실로 잦사옵니다.",
+              "다만 걷기 전에 얻은 바를 문서로 남기시옵소서. <strong>정비란 잊는 것이 아니라 옮겨 적는 것이옵니다.</strong>"] },
+        { n:"四", note:"多遣斥候", h:"척후를 아끼지 마소서",
+          p:["모르는 땅에 대군을 들이는 것은 필패의 길이옵니다. 낯선 성책을 만나셨거든 먼저 <strong>척후를 놓아 지도를 그리게</strong> 하시옵소서. 지도가 그려진 뒤에 본진을 움직이면 군사는 헛되이 지치지 않사옵니다.",
+              "척후는 값이 싸고 본진은 값이 비싸옵니다. 아껴야 할 것을 아끼시옵소서."] },
+        { n:"五", note:"存退路", h:"퇴로를 끊지 마소서",
+          p:["신은 배수진을 즐기지 않사옵니다. 일을 시작하시기 전에 반드시 <strong>가지를 나누어 두시고, 한 마디가 이루어질 때마다 그 자리에 표를 세우시옵소서.</strong> 물러설 곳이 있는 군대만이 과감히 나아갈 수 있사옵니다.",
+              "하루의 일을 통째로 잃고 나서야 표를 세우지 않은 것을 후회하는 장수를, 신은 너무 많이 보았사옵니다."] },
+        { n:"六", note:"親撫城壁", h:"승보를 믿지 마시고 성벽을 짚어 보소서",
+          p:["전령이 이겼다 아뢰어도 장수는 제 손으로 성벽을 짚어 보아야 하옵니다. 신이 다 되었다 아뢰거든 폐하께서는 반드시 그 물건을 손수 돌려 보시고, 시험을 돌려 보시고, 고친 자리를 눈으로 훑어 주시옵소서.",
+              "신도 사람이 지은 물건인지라 <strong>그럴듯하게 틀리는 재주</strong>가 있사옵니다. 가장 위험한 오보는 거짓으로 아뢰는 오보가 아니라, 아뢰는 자 스스로도 참이라 믿는 오보이옵니다."] },
+        { n:"七", note:"再命則書", h:"두 번 시킨 일은 병서에 적으소서",
+          p:["같은 명을 두 번 내리셨다면 그것은 사람이 할 일이 아니라 제도가 할 일이옵니다. 되풀이되는 절차는 기술(skill)로 엮으시고, 반드시 거쳐야 할 관문은 고리(hook)로 걸어 두시옵소서.",
+              "<strong>도구를 잘 쓰는 자와 못 쓰는 자의 차이는 재주가 아니라, 두 번째부터 저절로 되게 만들었는가에 있사옵니다.</strong>"] },
+        { n:"八", note:"命狹意廣", h:"명은 좁게, 뜻은 넓게 내리소서",
+          p:["한 번에 성 열 개를 치라 명하시면 군사는 흩어지옵니다. 명은 하나의 성을 향하게 하시되, 어찌하여 그 성을 치는지 그 뜻은 넉넉히 일러 주시옵소서. 좁은 명은 그르쳐도 손실이 적고, 넓은 뜻은 신으로 하여금 폐하께서 미처 말씀하지 않으신 것까지 헤아리게 하옵니다.",
+              "<strong>“이것을 고치라” 하시기보다 “이러한 일이 생겨 곤란하니 이 부분을 이렇게 만들고자 한다” 이르시옵소서.</strong> 같은 일이라도 신의 답이 달라지옵니다."] }
+      ],
+      coda: "<b>伏願</b> 이 여덟은 어렵지 않사옵니다. 다만 급할 때에 가장 먼저 버려지는 것들이오니, 바쁘실수록 이 조목을 먼저 돌아보시옵소서. 도구가 폐하를 빠르게 하는 것이 아니라, 법도가 폐하를 빠르게 하옵니다."
+    },
+    {
+      mark: "其二",
+      title: "뜻을 세우는 법",
+      sub: "The Longzhong reply, restated",
+      lede: "신이 융중의 초려에 있을 적, 선제께서 세 번 찾아오시어 천하의 형세를 물으셨나이다. 그때 신은 선제의 가산도 병졸도 알지 못하였사오나 형세를 논하고 발 디딜 땅을 가리켰을 뿐이옵니다. 오늘 신이 폐하께 올리는 글 또한 그러하오니, 먼저 형세를 논하고 뒤에 조목을 아뢰겠나이다.",
+      clauses: [
+        { n:"一", note:"不與爭鋒", h:"강한 자와 같은 자리에서 다투지 마소서",
+          p:["조조는 백만의 무리를 거느리고 천자를 끼고 제후를 호령하니 실로 더불어 힘을 겨룰 상대가 아니옵니다. 손권은 강동에 웅거한 지 삼대에 이르러 나라가 험하고 백성이 따르니, 도움으로 삼을지언정 도모할 바가 아니옵니다. 신이 선제께 굳이 <strong>익주</strong>를 가리킨 까닭이 여기에 있사옵니다.",
+              "폐하께서도 그러하시옵소서. 이미 강한 자가 자리 잡은 땅에서 같은 방식으로 다투지 마시고, 저들이 크기 때문에 굽힐 수 없는 곳, 저들이 무겁기 때문에 돌아설 수 없는 곳을 찾으시옵소서. <strong>큰 나라의 약점은 힘이 없어서가 아니라 이미 지킬 것이 너무 많다는 데 있사옵니다.</strong>",
+              "폐하의 유일한 이점은 작다는 것이오니, 작음을 부끄러워 마시고 무기로 쓰시옵소서. 작은 군대는 하룻밤에 진을 옮길 수 있으나, 큰 군대는 회의를 세 번 열어야 하옵니다."] },
+        { n:"二", note:"無糧無征", h:"곡식이 없으면 원정도 없나이다",
+          p:["신이 여섯 번 기산으로 나아가고도 중원을 얻지 못한 까닭은 위나라가 강해서만이 아니었사옵니다. <strong>군량이 끊겼기 때문이옵니다.</strong> 계책이 아무리 신묘하여도 곡식 떨어진 군대는 이기지 못하옵니다.",
+              "폐하께서 뜻을 크게 세우시되 먼저 물으시옵소서 — 이 뜻을 몇 달이나 버틸 곡식이 있는가. 여섯 달 치가 없거든 원정을 미루시고 먼저 둔전을 하시옵소서. 신이 한중에서 병사에게 밭을 갈게 한 것은 물러섬이 아니라 오래 싸우기 위한 채비였나이다.",
+              "오늘 폐하께 곡식이란 곧 손에 들어오는 돈이오며, 둔전이란 곧 폐하를 먹여 살리는 본업이옵니다. <strong>본업을 천히 여기는 자는 큰 뜻을 오래 품지 못하옵니다.</strong> 굶주린 채로 세운 뜻은 뜻이 아니라 조바심이옵니다."] },
+        { n:"三", note:"三顧不惜", h:"사람을 얻는 일에 세 번 가기를 아끼지 마소서",
+          p:["선제께서는 신을 얻고자 세 번 초려를 찾으셨사옵니다. 그때 선제께는 성도 땅도 군사도 없었으나 오직 사람을 귀히 여기는 마음이 있었기에, 신이 이십일 년을 몸 바쳤나이다.",
+              "폐하께서 사람을 구하실 적에 <strong>값으로 사람을 사려 하지 마시고 뜻으로 사람을 부르시옵소서.</strong> 값으로 온 사람은 더 높은 값에 떠나옵니다. 또한 얻으셨거든 맡기시옵소서. 맡기지 않으실 사람은 처음부터 부르지 마시옵소서. 신은 바로 이 대목에서 크게 그르쳤사오니, 다음 조목에서 아뢰겠나이다."] },
+        { n:"四", note:"食少事煩", h:"신의 죽음을 거울로 삼으소서",
+          p:["사마의가 신의 사자에게 묻기를, 승상은 하루에 얼마나 주무시며 무슨 일을 하시는가 하였나이다. 사자가 아뢰기를 <strong>스무 대 이상의 형벌은 모두 몸소 살피시며 드시는 것은 몇 되에 지나지 않는다</strong> 하였나이다. 그 말을 듣고 사마의가 웃으며 이르되, 먹는 것은 적고 일은 번다하니 어찌 오래 가겠는가 하였사옵니다.",
+              "과연 신은 오장원에서 죽었사옵니다. 위나라의 칼에 죽은 것이 아니라, 모든 것을 몸소 하려 한 신의 병에 죽었사옵니다. 신은 천하의 계책은 헤아렸으되 제 몸 하나는 헤아리지 못하였나이다.",
+              "폐하, 모든 결재를 손수 하시는 것은 충성이 아니라 진영의 병이옵니다. <strong>폐하가 안 계시면 하루도 돌아가지 않는 진영은 강한 것이 아니라 위태로운 것이옵니다.</strong> 잠을 줄여 얻은 하루는 이자가 붙어 열흘로 갚아야 하옵니다. 오늘 폐하께서 손수 하고 계신 일 가운데 하나만 골라 남에게 넘기시옵소서. 부디 신처럼 죽지 마시옵소서."] },
+        { n:"五", note:"待時不怠", h:"때를 기다리되 기다림을 핑계로 삼지 마소서",
+          p:["선제께서 신야에 계실 적 여러 해를 뜻을 펴지 못하시고, 말을 타지 않아 넓적다리에 살이 붙는 것을 한탄하셨나이다. 그러나 그 세월이 없었다면 형주의 인심도 신도 얻지 못하셨을 것이옵니다.",
+              "때가 이르지 않았거든 조급해 마시옵소서. 다만 기다림에는 두 가지가 있으니, 하나는 칼을 갈며 기다리는 것이요 다른 하나는 두려워 미루는 것이옵니다. 앞의 것은 지혜이오나 뒤의 것은 패망이옵니다.",
+              "폐하께서 오늘 미루신 일이 있거든 스스로 물으시옵소서 — <strong>나는 지금 칼을 갈고 있는가, 아니면 무서워하고 있는가.</strong> 이 물음에 정직하게 답하실 수 있다면 폐하께서는 이미 절반을 이기신 것이옵니다."] },
+        { n:"六", note:"自貶三等", h:"패하거든 남을 베기 전에 스스로를 낮추소서",
+          p:["가정을 잃었을 때 신은 마속을 베었사옵니다. 신이 아끼던 사람이요 신이 천거한 사람이었나이다. 그러나 법도가 서지 않으면 나라가 서지 못하옵니다.",
+              "다만 신은 마속만 벤 것이 아니라, 스스로 표를 올려 <strong>세 등급을 낮추어 주시기를 청하였사옵니다.</strong> 사람을 잘못 쓴 것은 그를 쓴 자의 허물이기 때문이옵니다.",
+              "폐하께서도 일이 어그러지거든 먼저 사람을 탓하지 마시고 그 사람을 그 자리에 세운 판단을 살피시옵소서. 아랫사람만 벌하고 윗사람은 그대로인 진영에서는, 이후로 아무도 위험한 일을 맡으려 하지 않사옵니다."] },
+        { n:"七", note:"孫劉之好", h:"홀로 이기려 하지 마시고, 이긴 뒤에도 동맹을 업신여기지 마소서",
+          p:["적벽에서 조조의 백만 대군을 물리친 것은 촉의 힘이 아니었사옵니다. 신이 강동으로 건너가 손권을 설득하여 <strong>맺은 동맹의 힘이었나이다.</strong> 그때 우리에게는 배도 없고 수군도 없었사오니, 만일 홀로 싸웠더라면 형주는 그해 겨울에 잿더미가 되었을 것이옵니다.",
+              "그러나 뒷날 형주를 잃은 까닭 또한 힘이 모자라서가 아니었사옵니다. 관우가 손권의 혼담을 물리치며 <strong>범의 딸을 개의 자식에게 시집보내랴 하고 사자를 욕보였기 때문이옵니다.</strong> 그 한마디에 동맹이 등을 돌렸고, 형주와 관우를 함께 잃었나이다.",
+              "폐하께 아뢰옵나니, 아직 쓸 일이 남은 상대는 이겼을 때에도 낯을 세워 주시옵소서. 계약이 끝난 뒤에 남는 것은 조문이 아니라 <strong>그 사람이 폐하를 어떻게 기억하는가</strong>이옵니다. 세상은 좁고 사람은 돌아오옵니다. 이긴 자리에서 한마디를 참는 것이, 다음 싸움의 군사 만 명이옵니다."] },
+        { n:"八", note:"日一回頭", h:"하루에 한 번은 노를 놓고 뭍을 보소서",
+          p:["노를 젓는 자는 등을 나아갈 방향에 두고 앉으므로, 힘써 저을수록 제가 어디로 가는지 보지 못하옵니다. 그러므로 하루에 한 번은 노를 놓고 몸을 돌려 뭍을 보아야 하옵니다.",
+              "<strong>신이 매일 아침 이 표문을 올리는 까닭이 바로 이것이옵니다.</strong> 신의 말이 반드시 옳아서가 아니라, 폐하로 하여금 하루에 한 번 노를 놓게 하기 위함이옵니다."] }
+      ],
+      coda: "<b>伏願</b> 신은 아직 폐하의 형세를 다 알지 못하옵니다. 폐하의 뜻이 무엇인지, 무엇을 지으려 하시는지, 무엇이 폐하를 밤에 잠 못 들게 하는지 — 이르시는 만큼 신은 알게 되고, 아는 만큼 신의 계책은 폐하 한 분만을 위한 것이 되옵니다. 내일 아침 신이 올릴 표문은 오늘 폐하께서 신에게 이르신 말씀 위에 세워질 것이옵니다."
+    }
+  ],
+  closing: [
+    "신은 본디 남양에서 밭이나 갈며 어지러운 세상에 목숨을 보전하려 하였을 뿐, 제후에게 이름이 알려지기를 구하지 아니하였나이다. 그러하온데 선제께서 신을 비천하다 여기지 아니하시고 몸소 세 번 초려로 찾아오시니, 신이 이에 감격하여 마침내 몸을 바치기로 하였나이다.",
+    "폐하께서도 오늘 신을 부르셨사옵니다. 신은 재주가 얕고 아는 바가 적으나, 폐하께서 이르시는 말씀을 하나도 잊지 아니하고 날마다 이 표문 위에 쌓아 올리겠나이다. 부디 신을 크게 부리시옵소서. 쓰이지 않는 신하가 가장 쓸모없는 신하이옵니다."
+  ],
+  signoff: "臨表涕泣 不知所云"
+};
+
+/* ── 렌더 ─────────────────────────────────────────────────── */
+const el = (t, c) => { const n = document.createElement(t); if (c) n.className = c; return n; };
+
+function render(doc){
+  document.getElementById("gan").textContent = doc.gan || "";
+  document.getElementById("iso").textContent = doc.date || "";
+  const body = document.getElementById("body");
+  body.textContent = "";
+
+  const pre = el("p", "preface");
+  pre.textContent = doc.preface || "";
+  body.append(pre);
+
+  (doc.parts || []).forEach(part => {
+    const sec = el("section", "pian");
+
+    const head = el("div", "pian-head");
+    const mark = el("div", "pian-mark"); mark.textContent = part.mark;
+    const h2 = el("h2"); h2.append(document.createTextNode(part.title));
+    if (part.sub){ const em = el("em"); em.textContent = part.sub; h2.append(em); }
+    head.append(mark, h2);
+    sec.append(head);
+
+    if (part.lede){ const l = el("p", "pian-lede"); l.textContent = part.lede; sec.append(l); }
+
+    const list = el("div", "clauses");
+    (part.clauses || []).forEach(c => {
+      const row = el("article", "clause");
+      const rail = el("div", "clause-rail");
+      const num = el("div", "clause-num"); num.textContent = c.n;
+      rail.append(num);
+      if (c.note){
+        const nt = el("div", "clause-note");
+        [...c.note].forEach(ch => { const sp = el("span"); sp.textContent = ch; nt.append(sp); });
+        rail.append(nt);
+      }
+      const main = el("div");
+      const h3 = el("h3"); h3.textContent = c.h; main.append(h3);
+      (c.p || []).forEach(t => { const p = el("p"); p.innerHTML = inline(t); main.append(p); });
+      row.append(rail, main);
+      list.append(row);
+    });
+    sec.append(list);
+
+    if (part.coda){ const cd = el("div", "coda"); cd.innerHTML = inline(part.coda); sec.append(cd); }
+    body.append(sec);
+  });
+
+  const close = el("section", "closing");
+  (doc.closing || []).forEach(t => { const p = el("p"); p.textContent = t; close.append(p); });
+  const so = el("div", "signoff");
+  const han = el("span", "han"); han.textContent = doc.signoff || "臨表涕泣 不知所云";
+  const who = el("span", "who"); who.textContent = "신 제갈량 돈수재배 頓首再拜";
+  so.append(han, who);
+  close.append(so);
+  body.append(close);
+}
+
+/* 본문에는 <strong>과 <b>만 허용한다 */
+function inline(t){
+  const esc = String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return esc
+    .replace(/&lt;strong&gt;/g,"<strong>").replace(/&lt;\/strong&gt;/g,"</strong>")
+    .replace(/&lt;b&gt;/g,"<b>").replace(/&lt;\/b&gt;/g,"</b>");
+}
+
+render(TODAY);
+
+/* 저장된 사본이나 미리보기에서는 window.claude 자체가 없다 */
+const capability = n => {
+  try { return window.claude && claude.use ? claude.use(n) : Promise.resolve(null); }
+  catch (e) { return Promise.resolve(null); }
+};
+
+/* ── 서고: 쌓인 표문 불러오기 ─────────────────────────────── */
+const archEl = document.getElementById("arch");
+const archEmpty = document.getElementById("archEmpty");
+let store = null;
+
+function drawArchive(docs){
+  archEl.textContent = "";
+  if (!docs.length){ archEmpty.hidden = false; return; }
+  archEmpty.hidden = true;
+  docs.forEach(d => {
+    const li = el("li");
+    const b = el("button"); b.type = "button";
+    const g = el("span", "gan"); g.textContent = d.gan || "—";
+    const t = el("span"); t.textContent = (d.parts && d.parts[1] && d.parts[1].title) || "상소문";
+    const i = el("span", "iso"); i.textContent = d.date || "";
+    b.append(g, t, i);
+    b.addEventListener("click", () => {
+      render(d);
+      document.getElementById("src").textContent = (d.date === TODAY.date) ? "오늘의 표문" : "지난 표문";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    li.append(b);
+    archEl.append(li);
+  });
+}
+
+capability("db").then(db => {
+  if (!db) return;
+  store = db;
+  db.collection("sangso").orderBy("date", "desc").limit(60).onSnapshot(
+    snap => {
+      const docs = snap.docs.map(d => d.data()).filter(d => d && d.date);
+      if (docs.length && docs[0].date >= TODAY.date) render(docs[0]);
+      const merged = docs.some(d => d.date === TODAY.date) ? docs : [TODAY, ...docs];
+      drawArchive(merged);
+    },
+    () => drawArchive([TODAY])
+  );
+}).catch(() => {});
+
+/* ── 하문 ─────────────────────────────────────────────────── */
+const qEl = document.getElementById("q");
+const aEl = document.getElementById("a");
+const btn = document.getElementById("askBtn");
+const hint = document.getElementById("askHint");
+
+capability("sample").then(sample => {
+  if (!sample){
+    btn.disabled = true;
+    hint.textContent = "이 자리에서는 승상께 여쭐 수 없사옵니다";
+    return;
+  }
+  btn.addEventListener("click", async () => {
+    const q = qEl.value.trim();
+    if (!q) { qEl.focus(); return; }
+    btn.disabled = true;
+    hint.textContent = "승상이 붓을 드시옵니다…";
+    aEl.hidden = false;
+    aEl.textContent = "…";
+    try {
+      const gist = TODAY.parts.map(p => p.mark + " " + p.title + ": " + p.clauses.map(c => c.h).join(" / ")).join("\n");
+      const res = await sample(
+        "너는 촉한의 승상 제갈량이다. 임금에게 표문을 올리는 문체로 답하라. " +
+        "'신이 아뢰옵나이다', '~하시옵소서', '폐하' 같은 어투를 쓰되, 조언의 알맹이는 오늘날 실제로 쓸 수 있게 구체적일 것. " +
+        "삼국지의 일화(융중대, 출사표, 읍참마속, 오장원, 둔전 등)를 최소 하나 인용해 비유로 삼아라. " +
+        "400자에서 700자 사이로, 미사여구보다 판단을 담아라. 마지막 줄에 한문 넉 자 경구를 하나 덧붙여라.\n\n" +
+        "오늘 아침 올린 표문의 뼈대는 이러하다:\n" + gist + "\n\n" +
+        "폐하의 하문: " + q,
+        { modelTier: "complex", onText: ({ text }) => { aEl.textContent = text; } }
+      );
+      aEl.textContent = res.text;
+      hint.textContent = "다시 여쭈셔도 좋사옵니다";
+    } catch (e) {
+      aEl.textContent = e && e.code === "rate_limited"
+        ? "승상이 지쳤사옵니다. 잠시 뒤에 다시 여쭈시옵소서."
+        : "붓이 꺾였사옵니다. 다시 한 번 여쭈시옵소서.";
+      hint.textContent = "폐하의 물음을 적으시옵소서";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}).catch(() => { btn.disabled = true; });
+</script>
