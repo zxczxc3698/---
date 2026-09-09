@@ -1,0 +1,441 @@
+<title>증량 식단 여섯 끼</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EEF1EF; --surface:#FFFFFF; --surface-2:#F6F8F6;
+  --ink:#131917; --ink-2:#3A4340; --muted:#5C6764; --faint:#8A9490;
+  --line:#D5DBD8; --line-soft:#E4E9E6;
+  --accent:#17564A; --accent-soft:#E2EBE7; --accent-ink:#0E3B33;
+  --signal:#A9741A; --signal-soft:#F6EBD4;
+  --done:#3C7D62; --done-soft:#E3F0EA;
+  --shadow:0 1px 2px rgba(19,25,23,.05), 0 8px 24px -16px rgba(19,25,23,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1211; --surface:#161B1A; --surface-2:#1B2120;
+    --ink:#E4EAE7; --ink-2:#C2CBC7; --muted:#94A09C; --faint:#6E7A76;
+    --line:#262E2C; --line-soft:#1F2624;
+    --accent:#59B69C; --accent-soft:#17302A; --accent-ink:#8FD6C1;
+    --signal:#E0AE45; --signal-soft:#2E2617;
+    --done:#5CB48D; --done-soft:#162A22;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1211; --surface:#161B1A; --surface-2:#1B2120;
+  --ink:#E4EAE7; --ink-2:#C2CBC7; --muted:#94A09C; --faint:#6E7A76;
+  --line:#262E2C; --line-soft:#1F2624;
+  --accent:#59B69C; --accent-soft:#17302A; --accent-ink:#8FD6C1;
+  --signal:#E0AE45; --signal-soft:#2E2617;
+  --done:#5CB48D; --done-soft:#162A22;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-weight:400; line-height:1.65; -webkit-font-smoothing:antialiased;
+  word-break:keep-all;
+}
+.wrap{max-width:760px; margin:0 auto; padding:34px 20px 80px; display:flex; flex-direction:column; gap:30px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+}
+
+/* ── 머리 ── */
+header{display:flex; flex-direction:column; gap:12px}
+h1{
+  font-family:"Hahmlet","Nanum Myeongjo",serif; font-weight:700;
+  font-size:clamp(30px,6vw,42px); line-height:1.15; margin:0;
+  letter-spacing:-.015em; text-wrap:balance;
+}
+h1 .dow{color:var(--muted); font-weight:500}
+.lede{margin:0; color:var(--ink-2); font-size:15px; max-width:60ch}
+
+/* ── 목표 판 ── */
+.readout{
+  background:var(--surface); border:1px solid var(--line); border-radius:4px;
+  padding:18px 20px 16px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow);
+}
+.figs{display:flex; flex-wrap:wrap; gap:26px 34px; align-items:flex-end}
+.fig{display:flex; flex-direction:column; gap:1px; min-width:0}
+.fig .k{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); font-family:"IBM Plex Mono",monospace}
+.fig .v{font-size:26px; font-weight:600; line-height:1.15; letter-spacing:-.02em}
+.fig .v small{font-size:13px; font-weight:400; color:var(--muted); margin-left:2px}
+.fig.rest .v{color:var(--accent)}
+.meter{height:6px; background:var(--line-soft); border-radius:99px; overflow:hidden}
+.meter i{display:block; height:100%; width:0; background:var(--accent); border-radius:99px; transition:width .45s cubic-bezier(.2,.7,.3,1)}
+.meter-cap{display:flex; justify-content:space-between; font-size:12px; color:var(--muted)}
+
+/* ── 끼니 타임라인 ── */
+h2{
+  font-family:"Hahmlet",serif; font-size:19px; font-weight:500; margin:0 0 2px;
+  letter-spacing:-.01em;
+}
+section{display:flex; flex-direction:column; gap:14px}
+.sec-head{display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap}
+.sec-head p{margin:0; font-size:13px; color:var(--muted)}
+.rail{display:flex; flex-direction:column}
+.meal{display:grid; grid-template-columns:58px 1fr; gap:0 16px}
+.tick{position:relative; display:flex; flex-direction:column; align-items:center; padding-top:20px}
+.tick time{font-size:12.5px; font-weight:500; color:var(--muted); font-family:"IBM Plex Mono",monospace}
+.tick .dot{
+  width:9px; height:9px; border-radius:99px; background:var(--line);
+  border:2px solid var(--ground); margin-top:6px; flex:none; z-index:1;
+}
+.tick .thread{width:1px; flex:1; background:var(--line); margin-top:-2px}
+.meal:last-child .thread{background:linear-gradient(var(--line),transparent)}
+.meal.now .tick time{color:var(--signal); font-weight:600}
+.meal.now .tick .dot{background:var(--signal); box-shadow:0 0 0 4px var(--signal-soft)}
+.meal.eaten .tick .dot{background:var(--done)}
+
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:4px;
+  padding:16px 18px 14px; margin-bottom:12px; display:flex; flex-direction:column; gap:12px;
+}
+.meal.now .card{border-color:var(--signal); box-shadow:var(--shadow)}
+.meal.eaten .card{background:var(--surface-2); border-color:var(--line-soft)}
+.card-top{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.card-top h3{
+  font-family:"Hahmlet",serif; font-size:17px; font-weight:500; margin:0; letter-spacing:-.01em;
+}
+.chip{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; letter-spacing:.06em;
+  padding:2px 7px; border-radius:3px; background:var(--accent-soft); color:var(--accent-ink);
+  white-space:nowrap;
+}
+.chip.now{background:var(--signal-soft); color:var(--signal)}
+.chip.done{background:var(--done-soft); color:var(--done)}
+.spread{margin-left:auto; display:flex; gap:6px}
+
+table{width:100%; border-collapse:collapse; font-size:14px}
+.tscroll{overflow-x:auto}
+td{padding:5px 0; border-bottom:1px dashed var(--line-soft); vertical-align:baseline}
+tr:last-child td{border-bottom:none}
+td.q{color:var(--muted); font-size:12.5px; white-space:nowrap; padding-left:12px; text-align:right; font-family:"IBM Plex Mono",monospace}
+td.k{color:var(--ink-2); font-size:12.5px; white-space:nowrap; padding-left:14px; text-align:right; font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+
+.tip{
+  margin:0; font-size:13px; color:var(--ink-2); background:var(--surface-2);
+  border-left:2px solid var(--accent); padding:8px 12px; border-radius:0 3px 3px 0;
+}
+.meal.eaten .tip{background:transparent; border-left-color:var(--line)}
+button{font:inherit; cursor:pointer}
+.eat{
+  align-self:flex-start; border:1px solid var(--line); background:var(--surface);
+  color:var(--ink-2); padding:6px 14px; border-radius:3px; font-size:13px; font-weight:500;
+  transition:background .15s, border-color .15s, color .15s;
+}
+.eat:hover{border-color:var(--accent); color:var(--accent)}
+.meal.eaten .eat{background:var(--done-soft); border-color:transparent; color:var(--done)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ── 체중 ── */
+.weight{
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:18px 20px;
+  display:flex; flex-direction:column; gap:14px;
+}
+.wrow{display:flex; gap:18px; align-items:flex-end; flex-wrap:wrap}
+.winput{display:flex; align-items:center; gap:8px}
+.winput input{
+  font:inherit; font-family:"IBM Plex Mono",monospace; font-size:20px; font-weight:500;
+  width:92px; padding:5px 8px; border:1px solid var(--line); border-radius:3px;
+  background:var(--ground); color:var(--ink); text-align:right;
+}
+.winput button{
+  border:1px solid var(--accent); background:var(--accent); color:var(--surface);
+  padding:8px 14px; border-radius:3px; font-size:13px; font-weight:500;
+}
+:root[data-theme="dark"] .winput button,
+:root:not([data-theme="light"]) .winput button{color:#0E1211}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .winput button{color:#fff}}
+.spark{flex:1; min-width:200px}
+.spark svg{display:block; width:100%; height:64px; overflow:visible}
+.wnote{margin:0; font-size:13px; color:var(--muted)}
+
+/* ── 목록 두 칸 ── */
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:16px 18px}
+.panel h3{font-family:"Hahmlet",serif; font-size:15px; font-weight:500; margin:0 0 10px}
+.panel ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px}
+.panel li{font-size:13.5px; color:var(--ink-2); padding-left:15px; position:relative; line-height:1.5}
+.panel li::before{content:""; position:absolute; left:0; top:.62em; width:5px; height:1px; background:var(--accent)}
+
+/* ── 규칙 ── */
+.rules{display:flex; flex-direction:column; gap:0}
+.rule{display:grid; grid-template-columns:30px 1fr; gap:0 12px; padding:12px 0; border-bottom:1px solid var(--line-soft)}
+.rule:last-child{border-bottom:none}
+.rule .n{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--accent); padding-top:2px}
+.rule p{margin:0; font-size:14px; color:var(--ink-2)}
+.rule b{color:var(--ink); font-weight:600}
+
+/* ── 주차표 ── */
+.weeks{width:100%; border-collapse:collapse; font-size:13.5px}
+.weeks th{
+  text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--faint); font-weight:500; font-family:"IBM Plex Mono",monospace;
+  padding:0 12px 7px 0; border-bottom:1px solid var(--line);
+}
+.weeks td{padding:9px 12px 9px 0; border-bottom:1px solid var(--line-soft); color:var(--ink-2)}
+.weeks td:first-child{color:var(--ink); font-weight:500; white-space:nowrap}
+.weeks .num{font-family:"IBM Plex Mono",monospace; white-space:nowrap}
+.weeks tr.on td{background:var(--accent-soft)}
+
+footer{color:var(--faint); font-size:12.5px; border-top:1px solid var(--line); padding-top:16px; line-height:1.7}
+footer b{color:var(--muted); font-weight:500}
+@media (max-width:520px){
+  .meal{grid-template-columns:46px 1fr; gap:0 12px}
+  .figs{gap:18px 24px}
+  .fig .v{font-size:22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow">증량 식단</div>
+    <h1 id="title">오늘의 식단</h1>
+    <p class="lede" id="lede"></p>
+  </header>
+
+  <div class="readout">
+    <div class="figs">
+      <div class="fig"><span class="k">먹은 열량</span><span class="v mono" id="f-eaten">0<small>kcal</small></span></div>
+      <div class="fig"><span class="k">오늘 목표</span><span class="v mono" id="f-target">—<small>kcal</small></span></div>
+      <div class="fig"><span class="k">단백질</span><span class="v mono" id="f-prot">0<small>g</small></span></div>
+      <div class="fig rest"><span class="k">남은 끼니</span><span class="v mono" id="f-rest">—<small>끼</small></span></div>
+    </div>
+    <div class="meter"><i id="meter"></i></div>
+    <div class="meter-cap"><span id="cap-left">아직 첫 끼니를 안 먹었다</span><span class="mono" id="cap-right"></span></div>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <h2>여섯 끼니</h2>
+      <p>먹은 끼니를 눌러 두면 남은 열량이 다시 계산된다</p>
+    </div>
+    <div class="rail" id="rail"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>몸무게</h2><p id="w-cap">토요일 아침, 공복에 한 번</p></div>
+    <div class="weight">
+      <div class="wrow">
+        <div class="winput">
+          <input id="w-in" type="number" step="0.1" min="30" max="200" inputmode="decimal" placeholder="70.0" aria-label="오늘 몸무게 kg">
+          <span class="mono" style="color:var(--muted)">kg</span>
+          <button id="w-save" type="button">기록</button>
+        </div>
+        <div class="spark" id="spark"></div>
+      </div>
+      <p class="wnote" id="w-note">주당 0.3~0.5kg이 정상이다. 그보다 빠르면 붙는 것이 근육이 아니라 지방이니 하루 200kcal를 덜어낸다.</p>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div class="panel"><h3>오늘 밤에 해둘 것</h3><ul id="prep"></ul></div>
+    <div class="panel"><h3>장 볼 것</h3><ul id="shop"></ul></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>위가 약한 사람의 여섯 규칙</h2></div>
+    <div class="panel rules">
+      <div class="rule"><span class="n">一</span><p><b>식전 30분부터 식사 중에는 물을 마시지 않는다.</b> 물은 식후 한 시간 뒤에. 위는 부피로 차지 열량으로 차지 않는다.</p></div>
+      <div class="rule"><span class="n">二</span><p><b>국물은 반 국자까지.</b> 국·찌개는 배를 채우고 밥자리를 빼앗는다. 건더기만 건져 먹는다.</p></div>
+      <div class="rule"><span class="n">三</span><p><b>모자란 열량은 씹지 말고 마신다.</b> 두유·오트밀 쉐이크 한 잔이 밥 한 공기 반이다. 부피는 절반이다.</p></div>
+      <div class="rule"><span class="n">四</span><p><b>기름 한 숟갈이 밥 반 공기다.</b> 나물·볶음마다 참기름·들기름·올리브유를 한 작은술씩 얹는다. 가장 싸게 열량을 올리는 법이다.</p></div>
+      <div class="rule"><span class="n">五</span><p><b>튀김·매운 것·빈속 커피는 거른다.</b> 위가 한 번 상하면 그날 하루 치가 아니라 사흘 치를 잃는다.</p></div>
+      <div class="rule"><span class="n">六</span><p><b>못 먹겠으면 남긴다.</b> 억지로 밀어 넣어 체하면 다음 끼니를 거르게 된다. 여섯 번을 거르지 않는 것이 한 번 많이 먹는 것보다 낫다.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>올려가는 차례</h2><p>위가 적응하는 속도에 맞춰 3주에 걸쳐 올린다</p></div>
+    <div class="panel">
+      <div class="tscroll">
+      <table class="weeks">
+        <thead><tr><th>주차</th><th>하루 열량</th><th>바뀌는 것</th></tr></thead>
+        <tbody>
+          <tr data-week="1"><td>1주차</td><td class="num">2,850 kcal</td><td>여섯 끼 시간을 몸에 새기는 주. 다 못 먹어도 시간은 지킨다.</td></tr>
+          <tr data-week="2"><td>2주차</td><td class="num">3,000 kcal</td><td>점심·저녁 밥을 210g으로. 쉐이크에 땅콩버터 반 술 더.</td></tr>
+          <tr data-week="3"><td>3주차부터</td><td class="num">3,200 kcal</td><td>쉐이크에 분리대두단백 한 스쿱. 야식에 계란 하나 더.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <b>먹기만 해서는 지방이 붙는다.</b> 주 3회, 스쿼트·데드리프트·벤치프레스·로우 다섯 세트씩. 늘어난 몸무게를 근육 쪽으로 돌리는 것은 이것뿐이다.<br>
+    유제품은 전부 무가당 두유로 바꿔 두었다. 두유가 물리면 락토프리 우유나 아몬드유로 바꿔도 열량은 비슷하다.
+  </footer>
+</div>
+
+<script>
+const SEED = {"date":"2026-09-10","dow":"목","week":1,"kcalTarget":2850,"proteinTarget":150,"note":"1주차 첫날. 오늘 목표는 2,850kcal를 채우는 것이 아니라 여섯 번 다 앉는 것이다.","meals":[{"id":"m1","time":"07:30","name":"아침","kcal":500,"protein":24,"items":[["흰쌀밥","180g",265],["계란 2개 스크램블","올리브유 1작은술",160],["두부 부침","1/4모 75g",55],["구운 김","1봉",15],["무국","반 국자만",5]],"tip":"국물은 반 국자. 아침에 국물로 배를 채우면 10시 반 쉐이크가 안 들어간다."},{"id":"m2","time":"10:30","name":"쉐이크","kcal":470,"protein":21,"items":[["무가당 두유","300ml",130],["오트밀","30g",115],["바나나","1개",90],["땅콩버터","1.5큰술 24g",135]],"tip":"믹서에 갈아 10분에 걸쳐 나눠 마신다. 한 번에 들이켜면 점심 도시락이 안 들어간다."},{"id":"m3","time":"12:30","name":"점심 도시락","kcal":680,"protein":43,"items":[["흰쌀밥","180g",265],["닭다리살 간장구이","150g",220],["애호박·양파 볶음","들기름 1작은술",90],["계란말이","계란 1.5개분",90],["방울토마토","5알",15]],"tip":"도시락은 전날 밤에 싸서 냉장고에. 아침에 싸려고 하면 결국 거른다."},{"id":"m4","time":"16:00","name":"간식","kcal":335,"protein":13,"items":[["아몬드·호두 믹스","한 줌 25g",160],["무가당 두유","200ml",85],["바나나","1개",90]],"tip":"견과는 미리 25g씩 소분해 가방에 넣어 둔다. 봉지째 들고 다니면 안 먹거나 다 먹는다."},{"id":"m5","time":"19:00","name":"저녁","kcal":585,"protein":31,"items":[["흰쌀밥","180g",265],["돼지 목살 구이","120g",250],["시금치나물","참기름 1작은술",60],["김치","조금",10]],"tip":"목살은 삼겹살보다 단백질이 높고 기름이 적어 위가 덜 부대낀다."},{"id":"m6","time":"22:00","name":"야식","kcal":280,"protein":18,"items":[["무가당 두유","200ml",85],["삶은 계란","1개",80],["통밀식빵 + 땅콩버터","1장 + 1작은술",115]],"tip":"잠들기 두 시간 전에 끝낸다. 먹고 바로 누우면 역류해서 다음 날 아침을 통째로 잃는다."}],"prep":["내일 점심 도시락 싸기 — 닭다리살 구워 완전히 식힌 뒤 담는다","냉동밥 180g씩 소분해서 얼려두기 (여섯 개면 사흘 치)","쉐이크 재료 소분 — 오트밀 30g씩 봉지에 미리 계량","견과 25g씩 소분"],"shopping":["무가당 두유 1L × 3","오트밀 500g","무가당 땅콩버터 1병","바나나 한 송이","아몬드·호두 믹스 500g","닭다리살 1kg / 돼지 목살 600g","계란 30구","두부 2모"]};
+
+const $ = s => document.querySelector(s);
+const nf = n => n.toLocaleString('ko-KR');
+const kstToday = () => new Date(Date.now() + 9*3600e3).toISOString().slice(0,10);
+
+let plan = SEED, done = {}, db = null, today = kstToday();
+
+/* ── 그리기 ── */
+function nowMinutes(){ const d = new Date(Date.now()+9*3600e3); return d.getUTCHours()*60 + d.getUTCMinutes(); }
+function mins(t){ const [h,m] = t.split(':').map(Number); return h*60+m; }
+
+function currentMealId(){
+  if (plan.date !== today) return null;
+  const n = nowMinutes();
+  let cur = null;
+  for (const m of plan.meals){ if (n >= mins(m.time) - 30) cur = m.id; }
+  return cur;
+}
+
+function renderHead(){
+  const [y,mo,d] = plan.date.split('-').map(Number);
+  $('#eyebrow').textContent = `증량 식단 · ${plan.week}주차`;
+  $('#title').innerHTML = `${mo}월 ${d}일 <span class="dow">${plan.dow}요일</span>`;
+  $('#lede').textContent = plan.note || '';
+  $('#f-target').innerHTML = `${nf(plan.kcalTarget)}<small>kcal</small>`;
+  document.querySelectorAll('.weeks tr[data-week]').forEach(tr =>
+    tr.classList.toggle('on', Number(tr.dataset.week) === Math.min(plan.week,3)));
+  const fill = (id, arr) => { $(id).innerHTML = ''; (arr||[]).forEach(t => {
+    const li = document.createElement('li'); li.textContent = t; $(id).appendChild(li); }); };
+  fill('#prep', plan.prep); fill('#shop', plan.shopping);
+}
+
+function renderMeals(){
+  const cur = currentMealId();
+  const rail = $('#rail'); rail.innerHTML = '';
+  for (const m of plan.meals){
+    const eaten = !!done[m.id];
+    const el = document.createElement('div');
+    el.className = 'meal' + (eaten ? ' eaten' : '') + (!eaten && m.id === cur ? ' now' : '');
+    const rows = m.items.map(([n,q,k]) =>
+      `<tr><td>${n}</td><td class="q">${q}</td><td class="k">${k}</td></tr>`).join('');
+    el.innerHTML = `
+      <div class="tick"><time>${m.time}</time><span class="dot"></span><span class="thread"></span></div>
+      <div class="card">
+        <div class="card-top">
+          <h3>${m.name}</h3>
+          ${!eaten && m.id === cur ? '<span class="chip now">지금</span>' : ''}
+          ${eaten ? '<span class="chip done">먹었다</span>' : ''}
+          <span class="spread"><span class="chip">${nf(m.kcal)} kcal</span><span class="chip">단백질 ${m.protein}g</span></span>
+        </div>
+        <div class="tscroll"><table><tbody>${rows}</tbody></table></div>
+        <p class="tip">${m.tip}</p>
+        <button class="eat" type="button" data-id="${m.id}">${eaten ? '✓ 먹었다' : '먹었다고 표시'}</button>
+      </div>`;
+    el.querySelector('.eat').addEventListener('click', () => toggle(m.id));
+    rail.appendChild(el);
+  }
+}
+
+function renderTotals(){
+  const eatenMeals = plan.meals.filter(m => done[m.id]);
+  const kcal = eatenMeals.reduce((s,m) => s+m.kcal, 0);
+  const prot = eatenMeals.reduce((s,m) => s+m.protein, 0);
+  const rest = plan.meals.length - eatenMeals.length;
+  $('#f-eaten').innerHTML = `${nf(kcal)}<small>kcal</small>`;
+  $('#f-prot').innerHTML = `${prot}<small>g</small>`;
+  $('#f-rest').innerHTML = `${rest}<small>끼</small>`;
+  const pct = Math.min(100, Math.round(kcal / plan.kcalTarget * 100));
+  $('#meter').style.width = pct + '%';
+  const left = plan.kcalTarget - kcal;
+  $('#cap-left').textContent = rest === 0 ? '오늘 여섯 끼를 다 먹었다. 이런 날이 쌓여야 몸이 는다.'
+    : kcal === 0 ? '아직 첫 끼니를 안 먹었다'
+    : `${nf(left)}kcal 남았다 · ${rest}끼로 나누면 한 끼에 ${nf(Math.round(left/rest))}kcal`;
+  $('#cap-right').textContent = pct + '%';
+}
+
+function render(){ renderHead(); renderMeals(); renderTotals(); }
+
+/* ── 저장 ── */
+async function toggle(id){
+  done[id] = !done[id];
+  renderMeals(); renderTotals();
+  try{ localStorage.setItem('siktan-'+plan.date, JSON.stringify(done)); }catch(e){}
+  if (db) { try{ await db.doc('log/'+plan.date).set({ date: plan.date, done }); }catch(e){} }
+}
+
+/* ── 몸무게 ── */
+function sparkline(rows){
+  const box = $('#spark');
+  if (rows.length < 2){
+    box.innerHTML = '<p class="wnote" style="margin:0">두 번 이상 기록하면 여기에 곡선이 그려진다.</p>';
+    return;
+  }
+  const W = 300, H = 64, pad = 14;
+  const ks = rows.map(r => r.kg);
+  const lo = Math.min(...ks), hi = Math.max(...ks), span = (hi - lo) || 1;
+  const x = i => pad + i * (W - pad*2) / (rows.length - 1);
+  const y = v => H - 16 - (v - lo) / span * (H - 34);
+  const pts = rows.map((r,i) => `${x(i).toFixed(1)},${y(r.kg).toFixed(1)}`).join(' ');
+  const last = rows[rows.length-1], first = rows[0];
+  const diff = (last.kg - first.kg);
+  box.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img"
+         aria-label="최근 몸무게 ${first.kg}kg에서 ${last.kg}kg">
+      <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="1.6"
+                stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      <circle cx="${x(rows.length-1).toFixed(1)}" cy="${y(last.kg).toFixed(1)}" r="3" fill="var(--accent)"/>
+      <text x="${pad}" y="${H-2}" fill="var(--faint)" font-size="9"
+            font-family="IBM Plex Mono, monospace">${first.date.slice(5)}</text>
+      <text x="${W-pad}" y="${H-2}" fill="var(--faint)" font-size="9" text-anchor="end"
+            font-family="IBM Plex Mono, monospace">${last.kg}kg (${diff>=0?'+':''}${diff.toFixed(1)})</text>
+    </svg>`;
+}
+
+async function loadWeights(){
+  if (!db) return;
+  try{
+    const rows = await db.collection('weight').orderBy('date','desc').limit(14).get();
+    const list = (rows || []).map(r => r.data ? r.data : r)
+      .filter(r => r && r.date && typeof r.kg === 'number')
+      .sort((a,b) => a.date < b.date ? -1 : 1);
+    sparkline(list);
+    if (list.length) $('#w-in').placeholder = String(list[list.length-1].kg);
+  }catch(e){}
+}
+
+$('#w-save').addEventListener('click', async () => {
+  const kg = parseFloat($('#w-in').value);
+  if (!(kg > 20 && kg < 250)) { $('#w-note').textContent = '몸무게를 kg으로 적어 주세요 (예: 70.4).'; return; }
+  if (!db){ $('#w-note').textContent = '이 화면에서는 기록이 저장되지 않는다. 상소문 페이지를 claude.ai에서 열어야 남는다.'; return; }
+  try{
+    await db.doc('weight/'+today).set({ date: today, kg });
+    $('#w-in').value = '';
+    $('#w-note').textContent = `${today.slice(5)} ${kg}kg 기록했다. 주당 0.3~0.5kg이 정상이다.`;
+    loadWeights();
+  }catch(e){ $('#w-note').textContent = '저장하지 못했다. 잠시 뒤 다시 눌러 주세요.'; }
+});
+
+/* ── 시작 ── */
+render();
+sparkline([]);
+try{ const cached = localStorage.getItem('siktan-'+plan.date);
+     if (cached){ done = JSON.parse(cached); renderMeals(); renderTotals(); } }catch(e){}
+setInterval(() => { const t = kstToday(); if (t !== today){ today = t; location.reload(); } else renderMeals(); }, 60000);
+
+(async () => {
+  if (!(window.claude && window.claude.use)) return;
+  db = await claude.use('db');
+  if (!db) return;
+  try{
+    const rows = await db.collection('siktan').orderBy('date','desc').limit(1).get();
+    const latest = (rows || []).map(r => r.data ? r.data : r)[0];
+    if (latest && latest.meals && latest.date >= plan.date){ plan = latest; done = {}; render(); }
+  }catch(e){}
+  try{
+    const log = await db.doc('log/'+plan.date).get();
+    const d = log && (log.data || log);
+    if (d && d.done){ done = d.done; renderMeals(); renderTotals(); }
+  }catch(e){}
+  loadWeights();
+})();
+</script>
