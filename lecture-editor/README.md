@@ -62,6 +62,7 @@ python3 edit_lecture.py render out/01_cut.mp4 out/subs.srt \
 | `--chapters` | chapters.txt | 소제목 목록 파일. 없으면 소제목을 넣지 않는다. |
 | `--chapter-seconds` | 4 | 소제목이 화면에 떠 있는 시간. |
 | `--no-chapter-numbers` | 꺼짐 | 소제목 앞의 `1.` `2.` 번호를 뺀다. |
+| `--scale` | 없음 | `--scale 720` 처럼 주면 세로 해상도를 줄여 뽑는다. 파일을 주고받을 때. |
 | `--crf` | 20 | 18이면 고화질·큰 용량, 23이면 가벼움. |
 | `--terms` | terms.txt | 전문 용어 목록. 받아쓰기 정확도를 끌어올린다. |
 
@@ -84,6 +85,12 @@ python3 edit_lecture.py render out/01_cut.mp4 out/subs.srt \
 - 영상 왼쪽 위에 소제목이 4초간 떴다 사라진다.
 - `out/youtube_chapters.txt` — 유튜브 설명란에 붙이면 재생바가 챕터로 나뉜다.
   제목 카드 길이까지 더해서 계산하고, 유튜브 규칙대로 첫 줄을 `00:00` 으로 맞춘다.
+
+## 파일이 너무 클 때
+
+원본이 크면 `--scale 720 --crf 26` 으로 뽑는다. 말하는 사람이 크게 움직이지 않는
+강의 영상은 이 정도로도 글씨가 충분히 읽히고, 용량은 몇 분의 일로 준다.
+챕터별로 나눠 올리고 싶으면 `chapters.txt` 의 시각을 보고 잘라 쓰면 된다.
 
 ## 용어집
 

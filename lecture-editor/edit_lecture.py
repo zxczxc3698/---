@@ -468,14 +468,24 @@ def render(args):
     info = probe(src)
     font = pick_font(args.font)
 
+    # 화면을 줄여 뽑을 때는 먼저 줄이고, 글자 크기를 줄인 화면에 맞춘다
+    height = info["height"]
+    width = info["width"]
+    prescale = []
+    if args.scale and info["height"] and args.scale < info["height"]:
+        width = int(info["width"] * args.scale / info["height"]) // 2 * 2
+        height = args.scale
+        prescale.append(f"scale=-2:{args.scale}")
+        print(f"· {info['width']}x{info['height']} → {width}x{height} 로 줄여서 뽑습니다")
+
     style = dict(STYLE)
     style["FontName"] = font
-    style["Fontsize"] = str(int(info["height"] * 0.042)) if info["height"] else STYLE["Fontsize"]
-    style["MarginV"] = str(int(info["height"] * 0.05)) if info["height"] else STYLE["MarginV"]
+    style["Fontsize"] = str(int(height * 0.042)) if height else STYLE["Fontsize"]
+    style["MarginV"] = str(int(height * 0.05)) if height else STYLE["MarginV"]
     force = ",".join(f"{k}={v}" for k, v in style.items())
 
     body = out_dir / "02_subbed.mp4"
-    vf = []
+    vf = list(prescale)
     if srt.exists():
         print(f"· 자막 입히는 중 ({font})")
         vf.append(f"subtitles='{escape_for_filter(srt)}':force_style='{force}'")
@@ -485,10 +495,17 @@ def render(args):
     chapters = []
     chapters_file = Path(args.chapters) if args.chapters else None
     if chapters_file and chapters_file.exists():
-        cuts = out_dir / "cuts.json"
+        # 결과 폴더를 따로 잡았더라도, 넣은 영상 옆에 있는 구간표를 찾아 쓴다.
+        # 못 찾고 조용히 컷 기준으로 넘어가면 소제목이 죄다 어긋난다.
+        cuts = next((c for c in (out_dir / "cuts.json", Path(src).parent / "cuts.json")
+                     if c.exists()), None)
         basis = args.chapter_basis
+        if basis == "original" and cuts is None:
+            raise SystemExit(
+                "원본 시각 기준으로 맞추려면 cut 단계가 남긴 cuts.json 이 필요합니다.\n"
+                "  컷 편집본과 같은 폴더에 두거나, --chapter-basis cut 으로 넘기세요.")
         if basis == "auto":
-            basis = "original" if cuts.exists() else "cut"
+            basis = "original" if cuts else "cut"
         for c in read_chapters(chapters_file):
             at = map_to_cut(c["time"], cuts) if basis == "original" else c["time"]
             chapters.append({"at": at, "title": c["title"]})
@@ -497,7 +514,7 @@ def render(args):
         else:
             print(f"· 챕터 {len(chapters)}개 — 컷 편집본 시각 그대로 씁니다")
         ass = out_dir / "chapters.ass"
-        write_chapter_ass(chapters, ass, info["width"], info["height"], font,
+        write_chapter_ass(chapters, ass, width, height, font,
                           args.chapter_seconds, not args.no_chapter_numbers)
         vf.append(f"subtitles='{escape_for_filter(ass)}'")
     elif args.chapters and args.chapters != "chapters.txt":
@@ -514,7 +531,7 @@ def render(args):
     if args.title:
         print("· 제목 카드 붙이는 중")
         intro = make_intro(args.title, args.subtitle, out_dir,
-                           info["width"] or 1920, info["height"] or 1080, info["fps"],
+                           width or 1920, height or 1080, info["fps"],
                            args.intro_seconds, font, args.preset, args.crf)
         listing = out_dir / "concat.txt"
         listing.write_text("".join(f"file '{p.resolve().as_posix()}'\n" for p in (intro, body)),
@@ -581,6 +598,8 @@ def main():
     ap.add_argument("--no-chapter-numbers", action="store_true", help="소제목 앞 번호를 빼기")
     ap.add_argument("--crf", type=int, default=20, help="화질 (낮을수록 고화질, 18~23)")
     ap.add_argument("--preset", default="medium")
+    ap.add_argument("--scale", type=int, default=None,
+                    help="세로 해상도를 이 값으로 줄여서 뽑는다 (예: 720). 전달용 용량 줄이기")
     args = ap.parse_args()
 
     {"all": all_steps, "cut": cut, "sub": sub, "render": render}[args.step](args)
