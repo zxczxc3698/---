@@ -109,6 +109,115 @@ class Segment:
         return self.end - self.start
 
 
+def loudness_profile(path, window=0.25):
+    """0.25초 칸마다 음량(dB)을 잰다. 임계값을 녹음에 맞춰 잡기 위한 것."""
+    try:
+        import numpy as np
+    except ImportError:
+        return None
+    p = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", "16000",
+         "-f", "s16le", "-acodec", "pcm_s16le", "-"],
+        capture_output=True)
+    if p.returncode != 0 or not p.stdout:
+        return None
+    x = np.frombuffer(p.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+    n = int(16000 * window)
+    if len(x) < n * 4:
+        return None
+    frames = x[:len(x) // n * n].reshape(-1, n)
+    return 20 * np.log10(np.sqrt((frames ** 2).mean(axis=1)) + 1e-10)
+
+
+def auto_threshold(path):
+    """바닥 잡음과 말소리 사이에 임계값을 놓는다.
+
+    녹음마다 음량이 천차만별이라 고정값(-35dB)은 잘 맞지 않는다. 마이크가 멀면
+    말소리가 통째로 무음으로 잘려 나간다."""
+    import numpy as np
+    db = loudness_profile(path)
+    if db is None:
+        return None, None
+    floor = float(np.percentile(db, 10))     # 아무도 말하지 않을 때
+    speech = float(np.percentile(db, 90))    # 말하고 있을 때
+    if speech - floor < 12:                  # 둘이 구분되지 않는 녹음
+        return None, (floor, speech)
+    thr = floor + 0.30 * (speech - floor)
+    return max(-70.0, min(-25.0, thr)), (floor, speech)
+
+
+MIN_SPEECH = 0.25       # 이보다 짧은 토막은 말이 아니라 잡음(기침, 의자 소리)으로 본다
+
+
+def speech_by_rms(path, thr_db, minlen, hop=0.025, min_speech=MIN_SPEECH):
+    """음량 궤적을 직접 보고 말하는 구간을 집는다.
+
+    ffmpeg의 silencedetect는 순간 진폭으로 판정해서, RMS로 잰 임계값과 어긋난다.
+    (조용한 방의 웅웅거림도 순간순간 튀어서 무음으로 안 쳐 준다.)
+    잰 기준과 자르는 기준을 같게 맞추려고 여기서 직접 판정한다."""
+    db = loudness_profile(path, hop)
+    if db is None:
+        return None
+    loud = [bool(v) for v in (db > thr_db)]
+
+    def runs_of(mask):
+        out, i = [], 0
+        while i < len(mask):
+            j = i
+            while j < len(mask) and mask[j] == mask[i]:
+                j += 1
+            out.append([mask[i], i, j])
+            i = j
+        return out
+
+    def rewrite(mask, want, shorter_than, become):
+        """want 인 구간이 shorter_than 칸보다 짧으면 become 으로 바꾼다."""
+        for is_on, a, b in runs_of(mask):
+            if is_on == want and (b - a) < shorter_than:
+                for k in range(a, b):
+                    mask[k] = become
+        return mask
+
+    # 뜸을 먼저 잇는다. 25밀리초 눈금으로 보면 말은 음절마다 끊겨 있어서,
+    # 짧은 소리를 먼저 걷어내면 멀쩡한 음절이 잡음으로 몰려 지워진다.
+    loud = rewrite(loud, False, max(1, int(round(minlen / hop))), True)
+
+    # 이어 붙이고 난 뒤, 완성된 토막 단위로만 잡음을 걸러낸다.
+    # 긴 정적 사이에 홀로 남은 짧은 토막은 기침이나 의자 소리다.
+    return [Segment(a * hop, b * hop) for is_on, a, b in runs_of(loud)
+            if is_on and (b - a) * hop >= min_speech]
+
+
+def speech_by_vad(path, minlen, pad):
+    """사람 목소리인지를 보고 고른다.
+
+    음량만 보면 발소리·의자 끄는 소리·판서 소리가 전부 남는다. 강의 준비하며
+    움직이는 대목이 긴 촬영본에서는 이쪽이 훨씬 깨끗하다."""
+    try:
+        from faster_whisper.vad import get_speech_timestamps, VadOptions
+    except ImportError:
+        return None
+    try:
+        import numpy as np
+    except ImportError:
+        return None
+
+    p = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(path),
+         "-af", LOUDNESS,                 # 조용한 녹음은 키워 줘야 목소리로 알아본다
+         "-ac", "1", "-ar", "16000", "-f", "s16le", "-acodec", "pcm_s16le", "-"],
+        capture_output=True)
+    if p.returncode != 0 or not p.stdout:
+        return None
+    audio = np.frombuffer(p.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+
+    stamps = get_speech_timestamps(audio, VadOptions(
+        min_speech_duration_ms=int(MIN_SPEECH * 1000),
+        min_silence_duration_ms=int(minlen * 1000),
+        speech_pad_ms=int(pad * 1000)))
+    return [Segment(t["start"] / 16000, t["end"] / 16000) for t in stamps]
+
+
 def find_silences(path, db, minlen):
     p = subprocess.run(
         ["ffmpeg", "-hide_banner", "-nostats", "-i", str(path),
@@ -136,7 +245,11 @@ def keep_segments(duration, starts, ends, pad, min_keep):
     if cursor < duration:
         keeps.append(Segment(cursor, duration))
 
-    # 앞뒤 여유를 주고, 겹치면 합치고, 너무 짧은 토막은 버린다
+    return pad_and_merge(keeps, duration, pad, min_keep)
+
+
+def pad_and_merge(keeps, duration, pad, min_keep):
+    """앞뒤 여유를 주고, 겹치면 합치고, 너무 짧은 토막은 버린다."""
     padded = [Segment(max(0.0, k.start - pad), min(duration, k.end + pad)) for k in keeps]
     merged = []
     for k in padded:
@@ -164,9 +277,44 @@ def cut(args):
     info = probe(src)
 
     print(f"· 원본 {hhmmss(info['duration'])} / {info['width']}x{info['height']}")
-    print(f"· 무음 탐지 (임계 {args.db}dB, {args.minlen}초 이상)")
-    starts, ends = find_silences(src, args.db, args.minlen)
-    segs = keep_segments(info["duration"], starts, ends, args.pad, MIN_KEEP)
+
+    if args.mode == "speech":
+        raw = speech_by_vad(src, args.minlen, args.pad)
+        if raw is None:
+            raise SystemExit("말소리 판정에는 faster-whisper 와 numpy 가 필요합니다.\n"
+                             "  pip install faster-whisper\n"
+                             "  또는 --mode sound 로 음량 기준으로 자르세요.")
+        segs = pad_and_merge(raw, info["duration"], 0.0, MIN_SPEECH)
+        kept = sum(x.dur for x in segs)
+        cut_out = info["duration"] - kept
+        print(f"· 말소리 판정 — 목소리 {len(segs)}구간 = {hhmmss(kept)} "
+              f"(나머지 {hhmmss(cut_out)} 제거, {cut_out / info['duration'] * 100:.0f}% 단축)")
+        return finish_cut(src, segs, info, out_dir, args)
+
+    db = args.db
+    if db == "auto":
+        db, levels = auto_threshold(src)
+        if db is None:
+            db = SILENCE_DB
+            if levels:
+                print(f"· 바닥 잡음({levels[0]:.0f}dB)과 말소리({levels[1]:.0f}dB)가 겹칩니다. "
+                      f"기본값 {db}dB 를 씁니다")
+            else:
+                print(f"· 음량을 재지 못해 기본값 {db}dB 를 씁니다 (numpy 필요)")
+        else:
+            print(f"· 바닥 잡음 {levels[0]:.0f}dB, 말소리 {levels[1]:.0f}dB "
+                  f"→ 임계값 {db:.0f}dB 로 잡았습니다")
+    else:
+        db = float(db)
+
+    print(f"· 무음 탐지 (임계 {db:.0f}dB, {args.minlen}초 이상)")
+    raw = speech_by_rms(src, db, args.minlen)
+    if raw is None:                      # numpy 가 없으면 ffmpeg 판정으로
+        print("  (numpy 가 없어 ffmpeg 판정을 씁니다)")
+        starts, ends = find_silences(src, db, args.minlen)
+        segs = keep_segments(info["duration"], starts, ends, args.pad, MIN_KEEP)
+    else:
+        segs = pad_and_merge(raw, info["duration"], args.pad, MIN_KEEP)
     if not segs:
         raise SystemExit("남길 구간이 없습니다. --db 를 더 낮춰(-45 등) 보세요.")
 
@@ -176,6 +324,10 @@ def cut(args):
     print(f"· 말하는 구간 {len(segs)}개 = {hhmmss(kept)} "
           f"(무음 {hhmmss(cut_out)} 제거, {ratio:.0f}% 단축)")
 
+    return finish_cut(src, segs, info, out_dir, args)
+
+
+def finish_cut(src, segs, info, out_dir, args):
     (out_dir / "cuts.json").write_text(json.dumps(
         {"source_duration": info["duration"],
          "segments": [[round(k.start, 3), round(k.end, 3)] for k in segs]},
@@ -382,6 +534,59 @@ def map_to_cut(seconds, cuts_path):
     return elapsed
 
 
+def read_srt(path):
+    """손으로 고친 자막 파일을 도로 읽어 들인다."""
+    blocks = re.split(r"\n\s*\n", Path(path).read_text(encoding="utf-8-sig").strip())
+    cues = []
+    for b in blocks:
+        lines = [l for l in b.splitlines() if l.strip()]
+        if len(lines) < 2:
+            continue
+        m = re.search(r"([\d:,.]+)\s*-->\s*([\d:,.]+)", b)
+        if not m:
+            continue
+        body = lines[lines.index(next(l for l in lines if "-->" in l)) + 1:]
+        cues.append({"start": srt_seconds(m.group(1)), "end": srt_seconds(m.group(2)),
+                     "lines": body})
+    return cues
+
+
+def srt_seconds(stamp):
+    h, m, rest = stamp.replace(".", ",").split(":")
+    sec, _, ms = rest.partition(",")
+    return int(h) * 3600 + int(m) * 60 + int(sec) + int(ms.ljust(3, "0")[:3]) / 1000
+
+
+def ass_document(style_line, events, width, height):
+    """PlayRes 를 영상 크기로 못박은 ASS 한 장.
+
+    SRT 를 subtitles 필터에 그냥 넘기면 libass 가 기준 높이를 288 로 잡아서,
+    1080p 에서는 글자가 3.75배로 부풀어 화면을 덮는다."""
+    return "\n".join([
+        "[Script Info]", "ScriptType: v4.00+",
+        f"PlayResX: {width or 1920}", f"PlayResY: {height or 1080}",
+        "WrapStyle: 2", "ScaledBorderAndShadow: yes", "",
+        "[V4+ Styles]",
+        ("Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, "
+         "Bold, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV"),
+        style_line, "",
+        "[Events]", "Format: Layer, Start, End, Style, Text",
+        *events, ""])
+
+
+def write_subtitle_ass(cues, path, width, height, font, rel=0.044):
+    size = int(height * rel) if height else 48
+    style = ("Style: Sub," + ",".join([
+        font, str(size), "&H00FFFFFF", "&H00000000", "&H80000000",
+        "1", "1", str(max(2, int(size * 0.09))), str(max(1, int(size * 0.05))),
+        "2", "60", "60", str(int(height * 0.055) if height else 60)]))
+    events = []
+    for c in cues:
+        text = "\\N".join(l.strip() for l in c["lines"])
+        events.append(f"Dialogue: 0,{ass_time(c['start'])},{ass_time(c['end'])},Sub,{text}")
+    Path(path).write_text(ass_document(style, events, width, height), encoding="utf-8")
+
+
 def ass_time(t):
     t = max(0.0, t)
     cs = int(round(t * 100))
@@ -393,29 +598,19 @@ def ass_time(t):
 
 def write_chapter_ass(chapters, path, width, height, font, hold, numbered):
     """소제목 카드를 ASS로. 화면 왼쪽 위에 반투명 띠로 잠깐 떴다 사라진다."""
-    style = dict(CHAPTER_STYLE)
-    style["FontName"] = font
-    if height:
-        style["Fontsize"] = str(int(height * 0.038))
-        style["Outline"] = str(max(4, int(height * 0.009)))
-        style["MarginL"] = style["MarginV"] = str(int(height * 0.05))
-    order = ["FontName", "Fontsize", "PrimaryColour", "BackColour", "Bold",
-             "BorderStyle", "Outline", "Shadow", "Alignment", "MarginL", "MarginR", "MarginV"]
-    head = [
-        "[Script Info]", "ScriptType: v4.00+",
-        f"PlayResX: {width or 1920}", f"PlayResY: {height or 1080}", "",
-        "[V4+ Styles]",
-        ("Format: Name, Fontname, Fontsize, PrimaryColour, BackColour, Bold, "
-         "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV"),
-        "Style: Chapter," + ",".join(style[k] for k in order), "",
-        "[Events]", "Format: Layer, Start, End, Style, Text",
-    ]
+    size = int(height * 0.036) if height else 39
+    pad = max(4, int(size * 0.25))
+    margin = int(height * 0.05) if height else 54
+    style = ("Style: Chapter," + ",".join([
+        font, str(size), "&H00FFFFFF", "&H00141414", "&HA0141414",
+        "1", "3", str(pad), "0", "7", str(margin), str(margin), str(margin)]))
+    events = []
     for i, c in enumerate(chapters, 1):
         title = c["title"].replace("{", "(").replace("}", ")")
         label = f"{i}. {title}" if numbered else title
-        head.append(f"Dialogue: 0,{ass_time(c['at'])},{ass_time(c['at'] + hold)},Chapter,"
-                    f"{{\\fad(350,350)}}{label}")
-    Path(path).write_text("\n".join(head) + "\n", encoding="utf-8")
+        events.append(f"Dialogue: 0,{ass_time(c['at'])},{ass_time(c['at'] + hold)},Chapter,"
+                      f"{{\\fad(350,350)}}{label}")
+    Path(path).write_text(ass_document(style, events, width, height), encoding="utf-8")
 
 
 # ── 3단계: 자막 입혀 렌더 ─────────────────────────────────────────────────
@@ -478,17 +673,14 @@ def render(args):
         prescale.append(f"scale=-2:{args.scale}")
         print(f"· {info['width']}x{info['height']} → {width}x{height} 로 줄여서 뽑습니다")
 
-    style = dict(STYLE)
-    style["FontName"] = font
-    style["Fontsize"] = str(int(height * 0.042)) if height else STYLE["Fontsize"]
-    style["MarginV"] = str(int(height * 0.05)) if height else STYLE["MarginV"]
-    force = ",".join(f"{k}={v}" for k, v in style.items())
-
     body = out_dir / "02_subbed.mp4"
     vf = list(prescale)
     if srt.exists():
-        print(f"· 자막 입히는 중 ({font})")
-        vf.append(f"subtitles='{escape_for_filter(srt)}':force_style='{force}'")
+        cues = read_srt(srt)
+        print(f"· 자막 입히는 중 — {len(cues)}장 ({font})")
+        subs_ass = out_dir / "subs.ass"
+        write_subtitle_ass(cues, subs_ass, width, height, font, args.sub_size)
+        vf.append(f"subtitles='{escape_for_filter(subs_ass)}'")
     else:
         print(f"· 자막 파일이 없어 건너뜁니다 ({srt})")
 
@@ -579,7 +771,10 @@ def main():
     ap.add_argument("input")
     ap.add_argument("srt", nargs="?", help="render 단계에서 쓸 자막 파일")
     ap.add_argument("-o", "--out", default="out", help="결과 폴더 (기본 out)")
-    ap.add_argument("--db", type=float, default=SILENCE_DB, help="무음 임계값 dB")
+    ap.add_argument("--mode", choices=["sound", "speech"], default="sound",
+                    help="sound=조용한 구간을 자른다 / speech=사람 목소리만 남긴다")
+    ap.add_argument("--db", default="auto",
+                    help="무음 임계값 dB. 기본 auto — 녹음을 재서 알아서 잡는다")
     ap.add_argument("--minlen", type=float, default=SILENCE_MIN, help="잘라낼 최소 무음 길이(초)")
     ap.add_argument("--pad", type=float, default=PAD, help="말 앞뒤 여유(초)")
     ap.add_argument("--model", default="medium", help="whisper 모델 (medium/large-v3)")
@@ -588,6 +783,8 @@ def main():
     ap.add_argument("--terms", default="terms.txt", help="전문용어 목록 파일")
     ap.add_argument("--max-chars", type=int, default=SRT_MAX_CHARS)
     ap.add_argument("--font", default=None, help="자막 글꼴 이름")
+    ap.add_argument("--sub-size", type=float, default=0.044,
+                    help="자막 크기를 화면 높이에 대한 비율로 (0.044 = 1080p 에서 47px)")
     ap.add_argument("--title", default=None, help="제목 카드 문구 (없으면 생략)")
     ap.add_argument("--subtitle", default=None, help="제목 카드 둘째 줄")
     ap.add_argument("--intro-seconds", type=float, default=3.0)
