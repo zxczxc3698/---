@@ -1,0 +1,11 @@
+# 토큰은 절대 올리지 않는다
+.env
+
+# 내 계정 지표. 여러 기기에서 이력을 이어가고 싶다면 이 줄을 지워라.
+data/
+
+# 만들어지는 파일
+dashboard.html
+dashboard.artifact.html
+thumbs/
+videos/

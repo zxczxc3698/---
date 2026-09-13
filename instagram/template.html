@@ -1,0 +1,994 @@
+<title>릴스 성과 진단</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  color-scheme: light;
+  --ground:      #eceeeb;
+  --surface:     #ffffff;
+  --surface-2:   #f5f7f4;
+  --ink:         #14181a;
+  --ink-2:       #545c5e;
+  --ink-3:       #868f90;
+  --line:        #dce1dd;
+  --line-soft:   #e8ece8;
+  --accent:      #2a78d6;
+  --accent-soft: #e4eefb;
+  --signal:      #1baf7a;
+  --signal-soft: #e0f4ec;
+  --warn:        #a96500;
+  --warn-soft:   #f9efdf;
+  --shadow:      0 1px 2px rgba(20, 24, 26, .05), 0 8px 24px -16px rgba(20, 24, 26, .28);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground:      #0f1211;
+    --surface:     #181c1a;
+    --surface-2:   #202523;
+    --ink:         #edf0ec;
+    --ink-2:       #a6afab;
+    --ink-3:       #79817e;
+    --line:        #2c3330;
+    --line-soft:   #232827;
+    --accent:      #3987e5;
+    --accent-soft: #16243a;
+    --signal:      #199e70;
+    --signal-soft: #10241d;
+    --warn:        #c98500;
+    --warn-soft:   #2a2113;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .5), 0 10px 28px -18px rgba(0, 0, 0, .9);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground:      #0f1211;
+  --surface:     #181c1a;
+  --surface-2:   #202523;
+  --ink:         #edf0ec;
+  --ink-2:       #a6afab;
+  --ink-3:       #79817e;
+  --line:        #2c3330;
+  --line-soft:   #232827;
+  --accent:      #3987e5;
+  --accent-soft: #16243a;
+  --signal:      #199e70;
+  --signal-soft: #10241d;
+  --warn:        #c98500;
+  --warn-soft:   #2a2113;
+  --shadow:      0 1px 2px rgba(0, 0, 0, .5), 0 10px 28px -18px rgba(0, 0, 0, .9);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-inline: 20px;
+  padding-block: 40px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.num, .mono, .val { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+h1, h2, h3, h4 { font-family: Hahmlet, "IBM Plex Sans KR", serif; font-weight: 600; margin: 0; text-wrap: balance; }
+
+a { color: var(--accent); }
+
+/* ---------------------------------------------------------- 머리말 */
+
+.masthead { display: flex; flex-direction: column; gap: 18px; }
+.masthead-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+.masthead h1 { font-size: clamp(27px, 4.4vw, 38px); letter-spacing: -.01em; line-height: 1.25; }
+.handle {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px; color: var(--ink-2);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 2px 11px; background: var(--surface);
+}
+.thesis {
+  max-width: 62ch; color: var(--ink-2); font-size: 15.5px; margin: 0;
+  border-left: 2px solid var(--accent); padding-left: 14px;
+}
+.thesis b { color: var(--ink); font-weight: 600; }
+
+.notice {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+  border-radius: 4px; padding: 13px 16px; font-size: 13.5px; color: var(--ink);
+}
+.notice .tag {
+  flex: none; font-family: "IBM Plex Mono", monospace; font-size: 11px;
+  letter-spacing: .08em; color: var(--warn); text-transform: uppercase; padding-top: 2px;
+}
+
+/* ---------------------------------------------------------- 요약 수치 */
+
+.keyfigures {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 5px; overflow: hidden;
+}
+.kf { background: var(--surface); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 3px; }
+.kf .k { font-size: 11.5px; letter-spacing: .06em; color: var(--ink-3); text-transform: uppercase; }
+.kf .v { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; font-size: 25px; font-weight: 500; line-height: 1.2; letter-spacing: -.02em; }
+.kf .s { font-size: 12.5px; color: var(--ink-3); }
+.kf.lead .v { color: var(--signal); }
+
+/* ---------------------------------------------------------- 섹션 */
+
+section { display: flex; flex-direction: column; gap: 20px; }
+.sechead { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--ink); padding-top: 14px; }
+.eyebrow {
+  display: flex; align-items: center; gap: 9px;
+  font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .1em;
+  color: var(--ink-3); text-transform: uppercase;
+}
+.eyebrow .n { color: var(--accent); font-weight: 500; }
+.sechead h2 { font-size: clamp(20px, 2.6vw, 25px); }
+.sechead p { margin: 0; color: var(--ink-2); font-size: 14px; max-width: 66ch; }
+
+/* ---------------------------------------------------------- 정렬 막대 */
+
+.sortbar { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+.sortbar .lbl { font-size: 12px; color: var(--ink-3); margin-right: 3px; letter-spacing: .04em; }
+.chip {
+  font: inherit; font-size: 13px; cursor: pointer;
+  background: var(--surface); color: var(--ink-2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 13px;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.chip:hover { border-color: var(--ink-3); color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+.chip:focus-visible, .card:focus-visible, .iconbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------------------------------------------------------- 릴스 카드 */
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 16px; }
+.card {
+  display: flex; flex-direction: column; text-align: left; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 5px;
+  padding: 0; font: inherit; color: inherit; overflow: hidden;
+  transition: border-color .14s, transform .14s, box-shadow .14s;
+}
+.card:hover { border-color: var(--ink-3); transform: translateY(-2px); box-shadow: var(--shadow); }
+.thumb { position: relative; aspect-ratio: 4 / 5; background: var(--surface-2); overflow: hidden; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb .missing {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  color: var(--ink-3); font-size: 12px; letter-spacing: .04em;
+}
+.rank {
+  position: absolute; top: 8px; left: 8px;
+  font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500;
+  background: rgba(10,14,12,.72); color: #fff; border-radius: 3px; padding: 2px 6px;
+  backdrop-filter: blur(3px);
+}
+.badges { position: absolute; left: 8px; right: 8px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+.badge { font-size: 10.5px; font-weight: 500; border-radius: 3px; padding: 2px 7px; letter-spacing: .02em; }
+.badge.signal { background: var(--signal); color: #fff; }
+.badge.accent { background: var(--accent); color: #fff; }
+.badge.warn   { background: var(--warn); color: #fff; }
+.badge.muted  { background: rgba(10,14,12,.66); color: #fff; }
+
+.card-body { padding: 12px 13px 14px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.card-date { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-3); }
+.card-title {
+  font-size: 13.5px; line-height: 1.5; color: var(--ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-stats { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 10px; }
+.stat { display: flex; flex-direction: column; }
+.stat .k { font-size: 10.5px; color: var(--ink-3); letter-spacing: .04em; }
+.stat .v { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 500; }
+.stat.hi .v { color: var(--signal); }
+
+/* ---------------------------------------------------------- 차트 */
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 20px 20px 16px; }
+.panel + .panel { margin-top: 16px; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; margin-bottom: 4px; }
+.panel-head h3 { font-size: 16px; }
+.panel-head .sub { font-size: 12.5px; color: var(--ink-3); }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.tip {
+  position: absolute; pointer-events: none; opacity: 0; transform: translate(-50%, -100%);
+  background: var(--ink); color: var(--ground); border-radius: 4px; padding: 7px 10px;
+  font-size: 12px; line-height: 1.5; white-space: nowrap; z-index: 5;
+  transition: opacity .1s;
+}
+.tip .t { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+.empty-chart { color: var(--ink-3); font-size: 13.5px; padding: 28px 0 32px; text-align: center; }
+
+/* ---------------------------------------------------------- 표 */
+
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line-soft); }
+th { font-size: 11.5px; letter-spacing: .05em; color: var(--ink-3); text-transform: uppercase; font-weight: 500; }
+td.n, th.n { text-align: right; font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: none; }
+
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+
+.tagcloud { display: flex; flex-wrap: wrap; gap: 7px; }
+.tagpill {
+  display: inline-flex; align-items: baseline; gap: 7px;
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px;
+  font-size: 13px; background: var(--surface-2);
+}
+.tagpill .r { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--signal); font-weight: 500; }
+
+/* ---------------------------------------------------------- 자동 수집 */
+
+.collect { display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: flex-start; }
+.collect .status { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--ink-3); }
+.dot.on { background: var(--signal); }
+.dot.stale { background: var(--warn); }
+.cronbox {
+  flex: 1 1 340px; min-width: 0;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px;
+  padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start;
+}
+.cronbox code {
+  font-family: "IBM Plex Mono", monospace; font-size: 12px; line-height: 1.6;
+  color: var(--ink-2); white-space: pre-wrap; word-break: break-all; flex: 1;
+}
+.iconbtn {
+  font: inherit; font-size: 12px; cursor: pointer; flex: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+  padding: 4px 10px; color: var(--ink-2);
+}
+.iconbtn:hover { border-color: var(--ink-3); color: var(--ink); }
+
+/* ---------------------------------------------------------- 보고서 */
+
+.report { background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: clamp(22px, 4vw, 44px); }
+.report-inner { max-width: 68ch; }
+.report h2 { font-size: 22px; margin: 34px 0 10px; }
+.report h3 { font-size: 18px; margin: 30px 0 8px; }
+.report h4 { font-size: 15.5px; margin: 24px 0 6px; font-family: "IBM Plex Sans KR", sans-serif; font-weight: 600; }
+.report > .report-inner > :first-child { margin-top: 0; }
+.report p { margin: 0 0 14px; color: var(--ink-2); }
+.report strong { color: var(--ink); font-weight: 600; }
+.report ul { margin: 0 0 16px; padding-left: 20px; color: var(--ink-2); }
+.report li { margin-bottom: 6px; }
+.report code { font-family: "IBM Plex Mono", monospace; font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+.report table { margin-bottom: 18px; }
+
+.placeholder { color: var(--ink-2); font-size: 14px; }
+.placeholder ol { padding-left: 20px; margin: 10px 0 0; }
+.placeholder li { margin-bottom: 5px; }
+
+/* ---------------------------------------------------------- 상세 */
+
+dialog {
+  border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink);
+  padding: 0; max-width: 880px; width: calc(100vw - 32px); max-height: calc(100vh - 48px);
+  box-shadow: 0 24px 64px -20px rgba(0,0,0,.45);
+}
+dialog::backdrop { background: rgba(8, 11, 10, .58); backdrop-filter: blur(2px); }
+.detail { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); }
+.detail-media { background: var(--surface-2); border-right: 1px solid var(--line); }
+.detail-media img, .detail-media video { width: 100%; height: 100%; max-height: 62vh; object-fit: contain; display: block; background: #000; }
+.detail-body { padding: 22px 24px 24px; overflow-y: auto; max-height: calc(100vh - 48px); display: flex; flex-direction: column; gap: 16px; }
+.detail-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.detail-head h3 { font-size: 17px; line-height: 1.45; }
+.closebtn { font: inherit; font-size: 20px; line-height: 1; cursor: pointer; background: none; border: none; color: var(--ink-3); padding: 2px 6px; }
+.closebtn:hover { color: var(--ink); }
+.detail-caption { font-size: 13.5px; color: var(--ink-2); white-space: pre-wrap; max-height: 8.5em; overflow-y: auto; border-left: 2px solid var(--line); padding-left: 12px; }
+.pctbar { display: flex; align-items: center; gap: 8px; }
+.pctbar .track { flex: 1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; min-width: 40px; }
+.pctbar .fill { height: 100%; background: var(--accent); border-radius: 2px; }
+.pctbar .fill.signal { background: var(--signal); }
+.pctbar .pn { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-3); width: 4.5em; text-align: right; }
+
+@media (max-width: 640px) {
+  .detail { grid-template-columns: 1fr; }
+  .detail-media { border-right: none; border-bottom: 1px solid var(--line); }
+  .detail-media img, .detail-media video { max-height: 42vh; }
+}
+
+footer { font-size: 12.5px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  .card:hover { transform: none; }
+}
+</style>
+
+<script id="ig-data" type="application/json">{}</script>
+
+<div class="page" id="page"></div>
+
+<dialog id="detail"><div id="detail-content"></div></dialog>
+
+<script>
+(function () {
+  "use strict";
+
+  var D = {};
+  try { D = JSON.parse(document.getElementById("ig-data").textContent || "{}"); } catch (e) { D = {}; }
+
+  var reels = D.reels || [];
+  var summary = D.summary || {};
+  var account = D.account || {};
+  var page = document.getElementById("page");
+
+  /* --------------------------------------------------------- 숫자 서식 */
+
+  function na(v) { return v === null || v === undefined || (typeof v === "number" && !isFinite(v)); }
+  function int(v) { return na(v) ? "N/A" : Math.round(v).toLocaleString("ko-KR"); }
+  function pct(v, d) { return na(v) ? "N/A" : (v * 100).toFixed(d === undefined ? 2 : d) + "%"; }
+  function sec(v) { return na(v) ? "N/A" : v.toFixed(1) + "초"; }
+  function mult(v) { return na(v) ? "N/A" : v.toFixed(2) + "회"; }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function el(html) { var t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+
+  /* --------------------------------------------------------- 머리말 */
+
+  function mastheadHtml() {
+    var handle = account.username ? '<span class="handle">@' + esc(account.username) + "</span>" : "";
+    var thesis =
+      "조회수는 노출의 결과이고, <b>저장률과 공유율</b>은 남기고 싶었는지의 결과다. " +
+      "두 값이 추천 도달을 끌어올리므로 이 화면은 비율을 기준으로 정렬하고 순위를 매긴다. " +
+      "게시 " + (D.maturity_days || 7) + "일이 지나지 않은 릴스는 아직 수치가 자라는 중이라 비교에서 빼고 <b>집계중</b>으로 표시한다.";
+
+    var notices = "";
+    if (D.demo) {
+      notices += '<div class="notice"><span class="tag">예시</span><div>' +
+        "지금 보이는 숫자는 <strong>화면 확인용으로 지어낸 값</strong>이다. 실제 계정 수치가 아니다. " +
+        "<code>collect.py</code> 로 실제 데이터를 받은 뒤 <code>build_dashboard.py</code> 를 다시 돌리면 바뀐다." +
+        "</div></div>";
+    }
+    if ((D.unavailable_metrics || []).length) {
+      notices += '<div class="notice"><span class="tag">지표</span><div>이 계정에서 받을 수 없는 지표: <code>' +
+        esc(D.unavailable_metrics.join(", ")) + "</code> — 해당 칸은 N/A 로 둔다.</div></div>";
+    }
+
+    return '<header class="masthead">' +
+      '<div class="masthead-top"><h1>릴스 성과 진단</h1>' + handle + "</div>" +
+      '<p class="thesis">' + thesis + "</p>" + notices + "</header>";
+  }
+
+  function keyFigures() {
+    var f = [
+      { k: "팔로워", v: int(account.followers_count), s: followerDeltaLabel() },
+      { k: "분석 대상 릴스", v: summary.count == null ? "N/A" : summary.count + "개",
+        s: (summary.mature_count || 0) + "개 비교 가능" },
+      { k: "저장률 중앙값", v: pct(summary.median_save_rate), s: "저장 ÷ 조회", lead: true },
+      { k: "공유율 중앙값", v: pct(summary.median_share_rate), s: "공유 ÷ 조회", lead: true },
+      { k: "조회수 중앙값", v: int(summary.median_views), s: "릴스 1편 기준" },
+      { k: "평균 시청 시간", v: sec(summary.median_watch_time), s: "중앙값" }
+    ];
+    return '<div class="keyfigures">' + f.map(function (x) {
+      return '<div class="kf' + (x.lead ? " lead" : "") + '"><span class="k">' + esc(x.k) +
+        '</span><span class="v">' + esc(x.v) + '</span><span class="s">' + esc(x.s) + "</span></div>";
+    }).join("") + "</div>";
+  }
+
+  function followerDeltaLabel() {
+    var days = (D.trend && D.trend.day) || [];
+    var withF = days.filter(function (d) { return d.followers != null; });
+    if (withF.length < 2) return "추이 기록 전";
+    var first = withF[0], last = withF[withF.length - 1];
+    var diff = last.followers - first.followers;
+    var span = withF.length;
+    return (diff >= 0 ? "+" : "") + diff.toLocaleString("ko-KR") + " (기록 " + span + "일)";
+  }
+
+  function sectionHead(n, eyebrow, title, desc) {
+    return '<div class="sechead"><div class="eyebrow"><span class="n">' + n + "</span><span>" + esc(eyebrow) +
+      "</span></div><h2>" + esc(title) + "</h2>" + (desc ? "<p>" + desc + "</p>" : "") + "</div>";
+  }
+
+  /* --------------------------------------------------------- 릴스 목록 */
+
+  var SORTS = [
+    { key: "timestamp", label: "최신순", fmt: null },
+    { key: "save_rate", label: "저장률", fmt: pct },
+    { key: "share_rate", label: "공유율", fmt: pct },
+    { key: "views", label: "조회수", fmt: int },
+    { key: "likes", label: "좋아요", fmt: int },
+    { key: "saved", label: "저장", fmt: int },
+    { key: "shares", label: "공유", fmt: int },
+    { key: "comments", label: "댓글", fmt: int },
+    { key: "watch_time", label: "시청 시간", fmt: sec }
+  ];
+  var sortKey = "timestamp";
+
+  function sortedReels() {
+    var list = reels.slice();
+    list.sort(function (a, b) {
+      var x = a[sortKey], y = b[sortKey];
+      if (x == null && y == null) return (b.timestamp || "").localeCompare(a.timestamp || "");
+      if (x == null) return 1;
+      if (y == null) return -1;
+      if (sortKey === "timestamp") return String(y).localeCompare(String(x));
+      return y - x;
+    });
+    return list;
+  }
+
+  function cardHtml(r, i) {
+    var showRank = sortKey !== "timestamp";
+    var badges = (r.badges || []).map(function (b) {
+      return '<span class="badge ' + b.tone + '">' + esc(b.label) + "</span>";
+    }).join("");
+
+    var stats = [
+      { k: "저장률", v: pct(r.save_rate), hi: true },
+      { k: "공유율", v: pct(r.share_rate), hi: true },
+      { k: "조회", v: int(r.views) },
+      { k: "좋아요", v: int(r.likes) }
+    ];
+    var active = SORTS.filter(function (s) { return s.key === sortKey; })[0];
+    if (active && active.fmt && !["save_rate", "share_rate", "views", "likes"].includes(sortKey)) {
+      stats[3] = { k: active.label, v: active.fmt(r[sortKey]) };
+    }
+
+    return '<button class="card" type="button" data-id="' + esc(r.id) + '">' +
+      '<div class="thumb">' +
+        '<span class="missing">썸네일 없음</span>' +
+        '<img src="' + esc(r.thumb) + '" alt="" loading="lazy" onerror="this.remove()">' +
+        (showRank ? '<span class="rank">' + (i + 1) + "</span>" : "") +
+        (badges ? '<div class="badges">' + badges + "</div>" : "") +
+      "</div>" +
+      '<div class="card-body">' +
+        '<span class="card-date">' + esc(r.posted_label) + "</span>" +
+        '<span class="card-title">' + esc(r.headline) + "</span>" +
+        '<div class="card-stats">' + stats.map(function (s) {
+          return '<span class="stat' + (s.hi ? " hi" : "") + '"><span class="k">' + esc(s.k) +
+            '</span><span class="v">' + esc(s.v) + "</span></span>";
+        }).join("") + "</div>" +
+      "</div></button>";
+  }
+
+  function renderCards() {
+    var host = document.getElementById("cards");
+    if (!host) return;
+    var list = sortedReels();
+    host.innerHTML = list.map(cardHtml).join("");
+    host.querySelectorAll(".card").forEach(function (btn) {
+      btn.addEventListener("click", function () { openDetail(btn.getAttribute("data-id")); });
+    });
+  }
+
+  /* --------------------------------------------------------- 상세 */
+
+  var dialog = document.getElementById("detail");
+
+  function rowHtml(label, value, pctValue, tone) {
+    var bar = "";
+    if (pctValue != null) {
+      bar = '<div class="pctbar"><div class="track"><div class="fill' + (tone ? " " + tone : "") +
+        '" style="width:' + pctValue + '%"></div></div><span class="pn">상위 ' + (100 - pctValue) + "%</span></div>";
+    }
+    return "<tr><td>" + esc(label) + '</td><td class="n">' + esc(value) + "</td><td>" + bar + "</td></tr>";
+  }
+
+  function openDetail(id) {
+    var r = reels.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    var media = '<img src="' + esc(r.thumb) + '" alt="" onerror="this.style.display=\'none\'">';
+    var host = document.getElementById("detail-content");
+
+    host.innerHTML = '<div class="detail">' +
+      '<div class="detail-media">' + media + "</div>" +
+      '<div class="detail-body">' +
+        '<div class="detail-head"><h3>' + esc(r.headline) + "</h3>" +
+          '<button class="closebtn" type="button" aria-label="닫기">&times;</button></div>' +
+        '<div class="eyebrow"><span>' + esc(r.posted_label) + "</span><span>" +
+          (r.age_days == null ? "" : "게시 " + r.age_days + "일") + "</span>" +
+          (r.mature ? "" : "<span>집계중</span>") + "</div>" +
+        (r.caption ? '<div class="detail-caption">' + esc(r.caption) + "</div>" : "") +
+        '<div class="tablewrap"><table><tbody>' +
+          rowHtml("조회수", int(r.views), r.views_pct, null) +
+          rowHtml("도달", int(r.reach), null) +
+          rowHtml("반복 재생", mult(r.replay), null) +
+          rowHtml("저장", int(r.saved), null) +
+          rowHtml("저장률", pct(r.save_rate), r.save_rate_pct, "signal") +
+          rowHtml("공유", int(r.shares), null) +
+          rowHtml("공유율", pct(r.share_rate), r.share_rate_pct, "signal") +
+          rowHtml("좋아요", int(r.likes), null) +
+          rowHtml("댓글", int(r.comments), null) +
+          rowHtml("총 상호작용", int(r.interactions), r.engagement_rate_pct, null) +
+          rowHtml("평균 시청 시간", sec(r.watch_time), null) +
+        "</tbody></table></div>" +
+        (r.permalink ? '<p><a href="' + esc(r.permalink) + '" target="_blank" rel="noopener">인스타그램에서 재생하기 &rarr;</a></p>' : "") +
+      "</div></div>";
+
+    // 내려받아 둔 영상이 있으면 썸네일 대신 재생한다
+    var probe = new Image();
+    var v = document.createElement("video");
+    if (v.canPlayType && v.canPlayType("video/mp4")) {
+      fetch(r.video, { method: "HEAD" }).then(function (res) {
+        if (!res.ok) return;
+        var box = host.querySelector(".detail-media");
+        if (box) box.innerHTML = '<video src="' + esc(r.video) + '" controls playsinline preload="metadata" poster="' + esc(r.thumb) + '"></video>';
+      }).catch(function () {});
+    }
+    void probe;
+
+    host.querySelector(".closebtn").addEventListener("click", function () { dialog.close(); });
+    dialog.showModal();
+  }
+
+  dialog.addEventListener("click", function (e) { if (e.target === dialog) dialog.close(); });
+
+  /* --------------------------------------------------------- 차트 */
+
+  var charts = [];
+
+  function makeSvg(w, h) {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 " + w + " " + h);
+    s.setAttribute("width", w);
+    s.setAttribute("height", h);
+    s.setAttribute("role", "img");
+    return s;
+  }
+  function node(name, attrs) {
+    var n = document.createElementNS("http://www.w3.org/2000/svg", name);
+    for (var k in attrs) if (attrs[k] != null) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function ink(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function niceMax(v) {
+    if (!isFinite(v) || v <= 0) return 1;
+    var mag = Math.pow(10, Math.floor(Math.log10(v)));
+    var n = v / mag;
+    var steps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+    for (var i = 0; i < steps.length; i++) if (n <= steps[i] + 1e-9) return steps[i] * mag;
+    return 10 * mag;
+  }
+  function shortNum(v) {
+    if (na(v)) return "";
+    var a = Math.abs(v);
+    if (a >= 10000) return trimZero(v / 10000) + "만";
+    if (a >= 1000) return trimZero(v / 1000) + "천";
+    return Math.round(v).toLocaleString("ko-KR");
+  }
+  function trimZero(v) { return (Math.round(v * 10) / 10).toString(); }
+
+  /** 막대·선을 같은 좌표계로 그린다. 한 그림에 한 계열만 올린다. */
+  function plot(host, rows, opts) {
+    host.innerHTML = "";
+    var pts = rows.filter(function (r) { return r[opts.key] != null; });
+    if (pts.length < 2) {
+      host.innerHTML = '<p class="empty-chart">' + esc(opts.emptyText || "기록이 2일 이상 쌓여야 선이 그려진다.") + "</p>";
+      return;
+    }
+
+    var w = Math.max(host.clientWidth || 640, 280);
+    var h = opts.height || 220;
+    var pad = { t: 14, r: 14, b: 30, l: 46 };
+    var iw = w - pad.l - pad.r;
+    var ih = h - pad.t - pad.b;
+
+    var values = pts.map(function (r) { return r[opts.key]; });
+    var lo = opts.zeroBased === false ? Math.min.apply(null, values) : 0;
+    var hi = Math.max.apply(null, values);
+    if (opts.zeroBased === false) { var padv = (hi - lo) * 0.15 || 1; lo = Math.max(0, lo - padv); hi = hi + padv; }
+    else { hi = niceMax(hi); }
+    if (hi === lo) hi = lo + 1;
+
+    var x = function (i) { return pad.l + (pts.length === 1 ? iw / 2 : (iw * i) / (pts.length - 1)); };
+    var xBand = function (i) { return pad.l + (iw * i) / pts.length; };
+    var bw = Math.min(30, Math.max(2, (iw / pts.length) - 3));
+    var bandPad = function (i) { return (iw / pts.length - bw) / 2; };
+    var y = function (v) { return pad.t + ih - ((v - lo) / (hi - lo)) * ih; };
+
+    var svg = makeSvg(w, h);
+    svg.setAttribute("aria-label", opts.title || "");
+    var colLine = ink("--line"), colInk3 = ink("--ink-3"), colSeries = ink(opts.color || "--accent");
+    var colSurface = ink("--surface");
+
+    // 눈금과 격자 — 바탕으로 물러나 있어야 한다
+    for (var t = 0; t <= 4; t++) {
+      var val = lo + ((hi - lo) * t) / 4;
+      var yy = y(val);
+      svg.appendChild(node("line", { x1: pad.l, x2: w - pad.r, y1: yy, y2: yy, stroke: colLine, "stroke-width": 1 }));
+      var lab = node("text", { x: pad.l - 8, y: yy + 4, "text-anchor": "end", fill: colInk3, "font-size": 10.5 });
+      lab.setAttribute("font-family", "IBM Plex Mono, monospace");
+      lab.textContent = opts.fmtAxis ? opts.fmtAxis(val) : shortNum(val);
+      svg.appendChild(lab);
+    }
+
+    if (opts.type === "bar") {
+      pts.forEach(function (r, i) {
+        var yy = y(r[opts.key]);
+        var height = Math.max(1, pad.t + ih - yy);
+        svg.appendChild(node("rect", {
+          x: xBand(i) + bandPad(i), y: yy, width: bw, height: height, rx: Math.min(4, bw / 2), fill: colSeries
+        }));
+      });
+    } else {
+      var d = pts.map(function (r, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(r[opts.key]).toFixed(1); }).join(" ");
+      var area = d + " L" + x(pts.length - 1).toFixed(1) + " " + (pad.t + ih) + " L" + x(0).toFixed(1) + " " + (pad.t + ih) + " Z";
+      svg.appendChild(node("path", { d: area, fill: colSeries, "fill-opacity": .1, stroke: "none" }));
+      svg.appendChild(node("path", { d: d, fill: "none", stroke: colSeries, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      var last = pts.length - 1;
+      svg.appendChild(node("circle", { cx: x(last), cy: y(pts[last][opts.key]), r: 4.5, fill: colSeries, stroke: colSurface, "stroke-width": 2 }));
+    }
+
+    // 가로축 이름표는 겹치지 않을 만큼만 찍는다
+    var every = Math.max(1, Math.ceil(pts.length / Math.floor(iw / 54)));
+    pts.forEach(function (r, i) {
+      if (i % every !== 0 && i !== pts.length - 1) return;
+      var tx = opts.type === "bar" ? xBand(i) + bandPad(i) + bw / 2 : x(i);
+      if (tx > w - pad.r - 12) tx = w - pad.r - 12;
+      var lab = node("text", { x: tx, y: h - 10, "text-anchor": "middle", fill: colInk3, "font-size": 10.5 });
+      lab.setAttribute("font-family", "IBM Plex Mono, monospace");
+      lab.textContent = r.label;
+      svg.appendChild(lab);
+    });
+
+    var cursor = node("line", { x1: 0, x2: 0, y1: pad.t, y2: pad.t + ih, stroke: colInk3, "stroke-width": 1, "stroke-dasharray": "3 3", opacity: 0 });
+    svg.appendChild(cursor);
+    host.appendChild(svg);
+
+    var tip = el('<div class="tip"></div>');
+    host.appendChild(tip);
+
+    svg.addEventListener("pointermove", function (ev) {
+      var rect = svg.getBoundingClientRect();
+      var px = ((ev.clientX - rect.left) / rect.width) * w;
+      var idx = opts.type === "bar"
+        ? Math.min(pts.length - 1, Math.max(0, Math.floor(((px - pad.l) / iw) * pts.length)))
+        : Math.min(pts.length - 1, Math.max(0, Math.round(((px - pad.l) / iw) * (pts.length - 1))));
+      var r = pts[idx];
+      var cx = opts.type === "bar" ? xBand(idx) + bandPad(idx) + bw / 2 : x(idx);
+      cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx); cursor.setAttribute("opacity", 1);
+      tip.innerHTML = '<div>' + esc(r.label) + '</div><div class="t">' + esc(opts.fmtTip ? opts.fmtTip(r[opts.key]) : int(r[opts.key])) + "</div>";
+      tip.style.left = Math.min(Math.max((cx / w) * rect.width, 52), rect.width - 52) + "px";
+      tip.style.top = (y(r[opts.key]) / h) * rect.height - 10 + "px";
+      tip.style.opacity = 1;
+    });
+    svg.addEventListener("pointerleave", function () { tip.style.opacity = 0; cursor.setAttribute("opacity", 0); });
+  }
+
+  /** 조회수 × 저장률 흩뿌림. 중앙값 십자선으로 네 구역을 나눈다. */
+  function scatter(host) {
+    host.innerHTML = "";
+    var pts = reels.filter(function (r) { return r.mature && r.views != null && r.save_rate != null && r.views > 0; });
+    if (pts.length < 4) {
+      host.innerHTML = '<p class="empty-chart">비교 가능한 릴스가 4개 이상 모이면 그려진다.</p>';
+      return;
+    }
+
+    var w = Math.max(host.clientWidth || 640, 280);
+    var h = 300;
+    var pad = { t: 16, r: 16, b: 38, l: 52 };
+    var iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+
+    var lx = pts.map(function (r) { return Math.log10(r.views); });
+    var xmin = Math.min.apply(null, lx) - 0.08, xmax = Math.max.apply(null, lx) + 0.08;
+    var ymax = niceMax(Math.max.apply(null, pts.map(function (r) { return r.save_rate; })));
+
+    var X = function (v) { return pad.l + ((Math.log10(v) - xmin) / (xmax - xmin)) * iw; };
+    var Y = function (v) { return pad.t + ih - (v / ymax) * ih; };
+
+    var svg = makeSvg(w, h);
+    svg.setAttribute("aria-label", "조회수 대비 저장률 분포");
+    var colLine = ink("--line"), colInk3 = ink("--ink-3"), colInk2 = ink("--ink-2");
+    var colAccent = ink("--accent"), colSignal = ink("--signal"), colSurface = ink("--surface"), colWarn = ink("--warn");
+
+    for (var t = 0; t <= 4; t++) {
+      var val = (ymax * t) / 4, yy = Y(val);
+      svg.appendChild(node("line", { x1: pad.l, x2: w - pad.r, y1: yy, y2: yy, stroke: colLine, "stroke-width": 1 }));
+      var lab = node("text", { x: pad.l - 8, y: yy + 4, "text-anchor": "end", fill: colInk3, "font-size": 10.5 });
+      lab.setAttribute("font-family", "IBM Plex Mono, monospace");
+      lab.textContent = (val * 100).toFixed(1) + "%";
+      svg.appendChild(lab);
+    }
+
+    var mv = summary.median_views, ms = summary.median_save_rate;
+    if (mv != null && ms != null) {
+      svg.appendChild(node("line", { x1: X(mv), x2: X(mv), y1: pad.t, y2: pad.t + ih, stroke: colInk3, "stroke-width": 1, "stroke-dasharray": "4 4" }));
+      svg.appendChild(node("line", { x1: pad.l, x2: w - pad.r, y1: Y(ms), y2: Y(ms), stroke: colInk3, "stroke-width": 1, "stroke-dasharray": "4 4" }));
+      [["잘 남는다", w - pad.r - 6, pad.t + 13, "end", colSignal],
+       ["숨은 수작", pad.l + 6, pad.t + 13, "start", colSignal],
+       ["노출만 됐다", w - pad.r - 6, pad.t + ih - 7, "end", colWarn]].forEach(function (q) {
+        var n = node("text", { x: q[1], y: q[2], "text-anchor": q[3], fill: q[4], "font-size": 11, "font-weight": 500 });
+        n.textContent = q[0];
+        svg.appendChild(n);
+      });
+    }
+
+    pts.forEach(function (r) {
+      var strong = ms != null && r.save_rate >= ms;
+      svg.appendChild(node("circle", {
+        cx: X(r.views), cy: Y(r.save_rate), r: 5.5,
+        fill: strong ? colSignal : colAccent, "fill-opacity": .82,
+        stroke: colSurface, "stroke-width": 2, "data-id": r.id
+      }));
+    });
+
+    var xLabel = node("text", { x: pad.l + iw / 2, y: h - 8, "text-anchor": "middle", fill: colInk2, "font-size": 11 });
+    xLabel.textContent = "조회수 (로그 눈금) →";
+    svg.appendChild(xLabel);
+
+    host.appendChild(svg);
+    var tip = el('<div class="tip"></div>');
+    host.appendChild(tip);
+
+    svg.addEventListener("pointermove", function (ev) {
+      var rect = svg.getBoundingClientRect();
+      var px = ((ev.clientX - rect.left) / rect.width) * w, py = ((ev.clientY - rect.top) / rect.height) * h;
+      var best = null, bestD = 1e9;
+      pts.forEach(function (r) {
+        var d = Math.pow(X(r.views) - px, 2) + Math.pow(Y(r.save_rate) - py, 2);
+        if (d < bestD) { bestD = d; best = r; }
+      });
+      if (!best || bestD > 900) { tip.style.opacity = 0; return; }
+      tip.innerHTML = "<div>" + esc(best.headline.slice(0, 24)) + '</div><div class="t">조회 ' + int(best.views) +
+        " · 저장률 " + pct(best.save_rate) + "</div>";
+      tip.style.left = Math.min(Math.max((X(best.views) / w) * rect.width, 70), rect.width - 70) + "px";
+      tip.style.top = (Y(best.save_rate) / h) * rect.height - 10 + "px";
+      tip.style.opacity = 1;
+    });
+    svg.addEventListener("pointerleave", function () { tip.style.opacity = 0; });
+  }
+
+  /* --------------------------------------------------------- 추이 구획 */
+
+  var period = "week";
+  var PERIODS = [["day", "일별"], ["week", "주간"], ["month", "월간"], ["year", "연간"]];
+
+  function renderTrend() {
+    var rows = (D.trend && D.trend[period]) || [];
+    var viewsHost = document.getElementById("chart-views");
+    var followHost = document.getElementById("chart-followers");
+    if (viewsHost) plot(viewsHost, rows, {
+      key: "views", type: "bar", color: "--accent", title: "계정 조회수",
+      emptyText: "계정 조회수는 수집을 시작한 다음 날부터 쌓인다."
+    });
+    if (followHost) plot(followHost, rows, {
+      key: "followers", type: "line", color: "--signal", zeroBased: false, title: "팔로워 수",
+      emptyText: "팔로워 추이는 이틀 이상 수집해야 선이 그려진다."
+    });
+  }
+
+  /* --------------------------------------------------------- 표 구획 */
+
+  function groupTable(rows, headLabel) {
+    if (!rows || !rows.length) {
+      return '<p class="empty-chart">표본이 모자란다. 묶음마다 릴스가 2편 이상 있어야 센다.</p>';
+    }
+    return '<div class="tablewrap"><table><thead><tr><th>' + esc(headLabel) +
+      '</th><th class="n">편</th><th class="n">조회수 중앙값</th><th class="n">저장률 중앙값</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        return "<tr><td>" + esc(r.label) + '</td><td class="n">' + r.n +
+          '</td><td class="n">' + int(r.median_views) + '</td><td class="n">' + pct(r.median_save_rate) + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
+  function hashtagHtml() {
+    var tags = D.hashtags || [];
+    if (!tags.length) return '<p class="empty-chart">같은 해시태그를 2편 이상 쓴 경우가 없어 비교할 수 없다.</p>';
+    return '<div class="tagcloud">' + tags.map(function (t) {
+      return '<span class="tagpill">#' + esc(t.tag) + '<span class="r">' + pct(t.median_save_rate, 1) +
+        '</span><span class="r" style="color:var(--ink-3)">' + t.n + "편</span></span>";
+    }).join("") + "</div>";
+  }
+
+  /* --------------------------------------------------------- 포지셔닝 */
+
+  function positioningHtml() {
+    var pos = D.positioning || {};
+    var rows = pos.rows || [];
+    var intro = pos.has_competitors
+      ? ""
+      : '<p class="empty-chart" style="text-align:left;padding:0 0 14px">' +
+        "비교할 경쟁 계정이 없다. <code>instagram/competitors.example.json</code> 을 " +
+        "<code>data/competitors.json</code> 으로 복사해 채우면 이 표에 나란히 선다. " +
+        "아래는 내 계정의 값이다.</p>";
+
+    var body = rows.map(function (r) {
+      var name = "@" + esc(r.username || "?");
+      var label = r.label ? '<span class="sub" style="display:block;font-size:11.5px;color:var(--ink-3)">' + esc(r.label) + "</span>" : "";
+      return "<tr" + (r.mine ? ' style="background:var(--accent-soft)"' : "") + ">" +
+        "<td><strong>" + name + "</strong>" + label + "</td>" +
+        '<td class="n">' + int(r.followers) + "</td>" +
+        '<td class="n">' + int(r.median_views) + "</td>" +
+        '<td class="n">' + (na(r.reach_multiple) ? "N/A" : r.reach_multiple.toFixed(2) + "배") + "</td>" +
+        '<td class="n">' + pct(r.like_rate, 1) + "</td>" +
+        '<td class="n">' + pct(r.comment_rate, 2) + "</td>" +
+        "<td>" + esc(r.note || "") + "</td></tr>";
+    }).join("");
+
+    return '<div class="panel">' + intro +
+      '<div class="tablewrap"><table><thead><tr>' +
+      "<th>계정</th><th class=\"n\">팔로워</th><th class=\"n\">조회수 중앙값</th>" +
+      "<th class=\"n\">팔로워 대비</th><th class=\"n\">좋아요율</th><th class=\"n\">댓글율</th><th>메모</th>" +
+      "</tr></thead><tbody>" + body + "</tbody></table></div>" +
+      '<p style="margin:14px 0 0;font-size:12.5px;color:var(--ink-3)">' +
+      "<strong>팔로워 대비</strong>는 조회수 ÷ 팔로워 수다. 1배를 크게 넘으면 팔로워 밖으로 퍼진 것이고, " +
+      "1배를 밑돌면 내 팔로워도 다 안 보고 있다는 뜻이다. 저장·저장률은 남의 계정에서 볼 수 없어 이 표에 없다.</p>" +
+      "</div>";
+  }
+
+  /* --------------------------------------------------------- 자동 수집 */
+
+  function collectHtml() {
+    var at = D.collected_at ? new Date(D.collected_at) : null;
+    var days = ((D.trend && D.trend.day) || []).length;
+    var hours = at ? (Date.now() - at.getTime()) / 3600000 : null;
+    var cls = hours == null ? "" : hours < 36 ? " on" : " stale";
+    var label = at
+      ? at.toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" }) +
+        (hours < 36 ? " · 최신" : " · " + Math.floor(hours / 24) + "일 지남")
+      : "아직 수집한 적이 없다";
+
+    var cron = "0 9 * * * cd " + "$HOME/instagram" + " && /usr/bin/python3 collect.py --limit 30 --quiet && /usr/bin/python3 build_dashboard.py --quiet";
+
+    return '<div class="panel"><div class="collect">' +
+      '<div style="flex:1 1 240px">' +
+        '<div class="status"><span class="dot' + cls + '"></span><span>마지막 수집 · ' + esc(label) + "</span></div>" +
+        '<p style="margin:8px 0 0;font-size:13.5px;color:var(--ink-2)">일별 기록 ' + days +
+        "일치. 팔로워 추이와 계정 조회수는 매일 한 번씩 찍어야 이어진다.</p>" +
+      "</div>" +
+      '<div class="cronbox"><code id="cronline">' + esc(cron) + '</code>' +
+        '<button class="iconbtn" type="button" id="copycron">복사</button></div>' +
+      "</div></div>";
+  }
+
+  /* --------------------------------------------------------- 보고서 */
+
+  function reportHtml() {
+    if (D.report && D.report.html) {
+      return '<div class="report"><div class="report-inner">' + D.report.html + "</div></div>";
+    }
+    return '<div class="report"><div class="report-inner placeholder">' +
+      "<p>아직 보고서가 없다. <code>instagram/report/report.md</code> 에 원고를 넣으면 이 자리에 붙는다.</p>" +
+      "<p>보고서는 다섯 부분으로 쓴다.</p><ol>" +
+      "<li><strong>콘텐츠 강점</strong> — 저장률·공유율 상위 릴스가 공유하는 주제·형식과 그 이유</li>" +
+      "<li><strong>콘텐츠 단점</strong> — 조회는 났는데 저장이 안 된 릴스의 공통점</li>" +
+      "<li><strong>보완 방법</strong> — 각 단점에 대한 구체적 처방</li>" +
+      "<li><strong>카테고리 내 포지셔닝</strong> — 경쟁 계정 수치를 따로 넣어야 판단할 수 있다</li>" +
+      "<li><strong>운영 방향성</strong> — 앞으로의 톤앤매너·주제·형식</li>" +
+      "</ol></div></div>";
+  }
+
+  /* --------------------------------------------------------- 조립 */
+
+  function emptyState() {
+    return '<div class="panel placeholder">' +
+      "<p><strong>아직 수집된 릴스가 없다.</strong></p><ol>" +
+      "<li><code>instagram/SETUP.md</code> 를 따라 액세스 토큰을 받는다</li>" +
+      "<li><code>python3 collect.py --check</code> 로 연결을 확인한다</li>" +
+      "<li><code>python3 collect.py --limit 30</code> 으로 지표를 받는다</li>" +
+      "<li><code>python3 build_dashboard.py</code> 를 다시 돌린다</li>" +
+      "</ol><p>화면만 먼저 보고 싶다면 <code>python3 build_dashboard.py --demo</code>.</p></div>";
+  }
+
+  function render() {
+    var hasReels = reels.length > 0;
+
+    page.innerHTML =
+      mastheadHtml() +
+      keyFigures() +
+
+      "<section>" + sectionHead("01", "릴스 성과", "게시물별 성과",
+        "카드를 누르면 지표 전체와 백분위가 열린다. <b>상위 %</b>는 게시 " + (D.maturity_days || 7) +
+        "일이 지난 릴스끼리만 견준 값이다.") +
+        (hasReels
+          ? '<div class="sortbar" id="sortbar"><span class="lbl">정렬</span></div><div class="cards" id="cards"></div>'
+          : emptyState()) +
+      "</section>" +
+
+      "<section>" + sectionHead("02", "무엇이 남는가", "조회수 대 저장률",
+        "오른쪽 아래로 갈수록 <b>노출은 됐지만 남기고 싶지 않았던</b> 릴스다. 왼쪽 위는 조회수가 작아도 반응이 짙은 릴스로, 다음에 밀어볼 후보다.") +
+        '<div class="panel"><div class="chart" id="chart-scatter"></div></div>' +
+      "</section>" +
+
+      "<section>" + sectionHead("03", "계정 추이", "조회수와 팔로워",
+        "두 지표는 단위가 달라 한 그림에 겹치지 않는다. 축을 따로 두고 나란히 본다.") +
+        '<div class="sortbar" id="periodbar"><span class="lbl">기간</span></div>' +
+        '<div class="panel"><div class="panel-head"><h3>계정 조회수</h3><span class="sub">구간 합계</span></div>' +
+          '<div class="chart" id="chart-views"></div></div>' +
+        '<div class="panel"><div class="panel-head"><h3>팔로워 수</h3><span class="sub">구간 마지막 값</span></div>' +
+          '<div class="chart" id="chart-followers"></div></div>' +
+      "</section>" +
+
+      "<section>" + sectionHead("04", "언제, 무엇을", "게시 시점과 주제",
+        "표본이 2편 미만인 묶음은 우연일 가능성이 커서 아예 세지 않는다.") +
+        '<div class="split">' +
+          '<div class="panel"><div class="panel-head"><h3>요일별</h3></div>' + groupTable(D.by_weekday, "요일") + "</div>" +
+          '<div class="panel"><div class="panel-head"><h3>시간대별</h3></div>' + groupTable(D.by_hour, "시간대") + "</div>" +
+        "</div>" +
+        '<div class="panel"><div class="panel-head"><h3>해시태그별 저장률</h3><span class="sub">2편 이상 쓴 태그만</span></div>' +
+          hashtagHtml() + "</div>" +
+      "</section>" +
+
+      "<section>" + sectionHead("05", "포지셔닝", "같은 판의 다른 계정들",
+        "남의 계정은 저장·공유가 공개되지 않는다. 밖에서 셀 수 있는 것만 견준다.") +
+        positioningHtml() +
+      "</section>" +
+
+      "<section>" + sectionHead("06", "자동 수집", "매일 한 번 찍기",
+        "이 화면은 정적 파일이라 스스로 수집하지 않는다. 아래 줄을 <code>crontab -e</code> 에 넣어야 실제로 돈다.") +
+        collectHtml() +
+      "</section>" +
+
+      "<section>" + sectionHead("07", "종합 분석", "무엇을 어떻게 바꿀 것인가", "") +
+        reportHtml() +
+      "</section>" +
+
+      "<footer><span>생성 " + (D.generated_at ? new Date(D.generated_at).toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" }) : "N/A") +
+      "</span><span>빈 값은 채우지 않고 N/A 로 둔다</span>" +
+      (D.demo ? "<span>예시 데이터</span>" : "") + "</footer>";
+
+    if (hasReels) {
+      var bar = document.getElementById("sortbar");
+      SORTS.forEach(function (s) {
+        var b = el('<button class="chip" type="button" aria-pressed="' + (s.key === sortKey) + '">' + esc(s.label) + "</button>");
+        b.addEventListener("click", function () {
+          sortKey = s.key;
+          bar.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+          b.setAttribute("aria-pressed", "true");
+          renderCards();
+        });
+        bar.appendChild(b);
+      });
+      renderCards();
+    }
+
+    var pbar = document.getElementById("periodbar");
+    PERIODS.forEach(function (p) {
+      var b = el('<button class="chip" type="button" aria-pressed="' + (p[0] === period) + '">' + p[1] + "</button>");
+      b.addEventListener("click", function () {
+        period = p[0];
+        pbar.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+        b.setAttribute("aria-pressed", "true");
+        renderTrend();
+      });
+      pbar.appendChild(b);
+    });
+
+    var copy = document.getElementById("copycron");
+    if (copy) copy.addEventListener("click", function () {
+      var text = document.getElementById("cronline").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(text);
+      copy.textContent = "복사됨";
+      setTimeout(function () { copy.textContent = "복사"; }, 1600);
+    });
+
+    renderTrend();
+    scatter(document.getElementById("chart-scatter"));
+  }
+
+  var resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      renderTrend();
+      scatter(document.getElementById("chart-scatter"));
+    }, 160);
+  });
+  void charts;
+
+  render();
+})();
+</script>
