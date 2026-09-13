@@ -41,6 +41,31 @@ def drive_id(url):
     return None
 
 
+def folder_files(url):
+    """공개된 드라이브 폴더 페이지를 읽어 안에 든 영상들을 뽑는다.
+
+    구글이 페이지 짜임새를 바꾸면 깨질 수 있다. 안 되면 링크를 한 줄씩 적어 주면 된다."""
+    p = subprocess.run(["curl", "-sSL", "--max-time", "90",
+                        "-H", "User-Agent: Mozilla/5.0", url],
+                       capture_output=True, text=True)
+    if p.returncode != 0 or not p.stdout:
+        return []
+    html = p.stdout
+    # 폴더 페이지는 [ "<아이디>", ... ,"<파일이름>" ...] 꼴로 목록을 품고 있다
+    found, seen = [], set()
+    for fid, name in re.findall(
+            r'"([A-Za-z0-9_-]{25,45})"\s*,\s*\[[^\]]*\]\s*,\s*"([^"]{1,120})"', html):
+        if fid in seen or fid == drive_id(url):
+            continue
+        if not re.search(r"\.(mp4|mov|m4v|avi|mkv|webm)$", name, re.I):
+            continue
+        seen.add(fid)
+        found.append({"url": f"https://drive.google.com/file/d/{fid}/view",
+                      "title": Path(name).stem})
+    found.sort(key=lambda j: j["title"])
+    return found
+
+
 def read_list(path):
     """목록 파일을 읽는다. 링크 | 제목."""
     jobs = []
@@ -107,7 +132,9 @@ def edit(src, out_dir, job, args):
 
 def main():
     ap = argparse.ArgumentParser(description="강의 여러 개를 한 번에 편집")
-    ap.add_argument("list", help="링크 목록 파일")
+    ap.add_argument("list", nargs="?", help="링크 목록 파일")
+    ap.add_argument("--folder", default=None,
+                    help="공개된 드라이브 폴더 링크. 안에 든 영상을 모두 처리한다")
     ap.add_argument("-o", "--out", default="결과", help="결과를 모을 폴더")
     ap.add_argument("--work", default=None, help="내려받은 원본을 둘 곳")
     ap.add_argument("--course", default="특수부대 합격 로드맵", help="제목 카드 첫 줄")
@@ -126,7 +153,21 @@ def main():
                     help="편집이 끝나도 내려받은 원본을 지우지 않는다")
     args = ap.parse_args()
 
-    jobs = read_list(args.list)
+    if args.folder:
+        jobs = folder_files(args.folder)
+        if not jobs:
+            raise SystemExit(
+                "폴더에서 영상을 찾지 못했습니다.\n"
+                "  폴더가 「링크가 있는 모든 사용자」로 열려 있는지 확인하고,\n"
+                "  그래도 안 되면 링크를 한 줄씩 적은 목록 파일을 쓰세요.")
+        listing = Path(args.out); listing.mkdir(parents=True, exist_ok=True)
+        (listing / "_목록.txt").write_text(
+            "\n".join(f"{j['url']} | {j['title']}" for j in jobs) + "\n", encoding="utf-8")
+        print(f"폴더에서 영상 {len(jobs)}개를 찾았습니다 ({listing / '_목록.txt'})")
+    elif args.list:
+        jobs = read_list(args.list)
+    else:
+        raise SystemExit("목록 파일이나 --folder 중 하나는 있어야 합니다.")
     out_root = Path(args.out); out_root.mkdir(parents=True, exist_ok=True)
     work = Path(args.work) if args.work else out_root / "_원본"
     work.mkdir(parents=True, exist_ok=True)

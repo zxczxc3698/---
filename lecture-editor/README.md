@@ -115,6 +115,15 @@ https://drive.google.com/file/d/<아이디>/view | 1강 체력검정 기준
 https://drive.google.com/file/d/<아이디>/view | 2강 윗몸일으키기
 ```
 
+폴더째로 넘겨도 된다. 안에 든 영상을 찾아 `결과/_목록.txt` 로 적어 두고 차례로 돌린다.
+
+```bash
+python3 batch.py --folder "https://drive.google.com/drive/folders/<아이디>" -o 결과
+```
+
+폴더 읽기는 구글 페이지 짜임새에 기대고 있어서 언젠가 깨질 수 있다.
+안 되면 목록 파일을 쓰면 된다.
+
 드라이브 링크면 알아서 받아 온다. 「링크가 있는 모든 사용자」로 열어 두어야 한다.
 로컬 파일 경로나 다른 직접 링크도 그대로 쓴다.
 
