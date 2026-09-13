@@ -176,6 +176,11 @@ def cut(args):
     print(f"· 말하는 구간 {len(segs)}개 = {hhmmss(kept)} "
           f"(무음 {hhmmss(cut_out)} 제거, {ratio:.0f}% 단축)")
 
+    (out_dir / "cuts.json").write_text(json.dumps(
+        {"source_duration": info["duration"],
+         "segments": [[round(k.start, 3), round(k.end, 3)] for k in segs]},
+        ensure_ascii=False, indent=1), encoding="utf-8")
+
     filter_path = out_dir / "cut_filter.txt"
     filter_path.write_text(build_filter(segs, info["has_video"]), encoding="utf-8")
     dst = out_dir / "01_cut.mp4"
@@ -326,6 +331,93 @@ def sub(args):
     return dst
 
 
+# ── 챕터 / 소제목 ────────────────────────────────────────────────────────
+# BorderStyle 3 = 글자 뒤에 불투명 상자. 4는 libass가 그리지 않는다.
+# Outline 값이 그 상자의 여백 노릇을 한다.
+CHAPTER_STYLE = {
+    "Fontsize": "30", "PrimaryColour": "&H00FFFFFF", "BackColour": "&HA0141414",
+    "Bold": "1", "BorderStyle": "3", "Outline": "7", "Shadow": "0",
+    "Alignment": "7", "MarginL": "48", "MarginR": "48", "MarginV": "48",
+}
+
+
+def parse_timecode(text):
+    """'12:34' 또는 '1:02:03' 또는 '75' 를 초로."""
+    parts = [float(x) for x in text.strip().split(":")]
+    seconds = 0.0
+    for x in parts:
+        seconds = seconds * 60 + x
+    return seconds
+
+
+def read_chapters(path):
+    """한 줄에 '시각 제목'. 예) 00:00 체력검정 기준 잡기"""
+    out = []
+    for raw in Path(path).read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        head, _, title = line.partition(" ")
+        if not title.strip():
+            raise SystemExit(f"챕터 줄에 제목이 없습니다: {raw!r}\n  예) 00:00 체력검정 기준 잡기")
+        try:
+            out.append({"time": parse_timecode(head), "title": title.strip()})
+        except ValueError:
+            raise SystemExit(f"시각을 읽을 수 없습니다: {raw!r}\n  예) 00:00 또는 1:02:03")
+    return sorted(out, key=lambda c: c["time"])
+
+
+def map_to_cut(seconds, cuts_path):
+    """원본 시각을 컷 편집된 영상의 시각으로 옮긴다.
+
+    잘려 나간 무음 한가운데를 가리키면, 바로 다음 말이 시작하는 자리로 당긴다."""
+    data = json.loads(Path(cuts_path).read_text(encoding="utf-8"))
+    elapsed = 0.0
+    for start, end in data["segments"]:
+        if seconds < start:          # 잘려 나간 구간 안 → 다음 구간 머리로
+            return elapsed
+        if seconds <= end:
+            return elapsed + (seconds - start)
+        elapsed += end - start
+    return elapsed
+
+
+def ass_time(t):
+    t = max(0.0, t)
+    cs = int(round(t * 100))
+    h, cs = divmod(cs, 360000)
+    m, cs = divmod(cs, 6000)
+    sec, cs = divmod(cs, 100)
+    return f"{h:d}:{m:02d}:{sec:02d}.{cs:02d}"
+
+
+def write_chapter_ass(chapters, path, width, height, font, hold, numbered):
+    """소제목 카드를 ASS로. 화면 왼쪽 위에 반투명 띠로 잠깐 떴다 사라진다."""
+    style = dict(CHAPTER_STYLE)
+    style["FontName"] = font
+    if height:
+        style["Fontsize"] = str(int(height * 0.038))
+        style["Outline"] = str(max(4, int(height * 0.009)))
+        style["MarginL"] = style["MarginV"] = str(int(height * 0.05))
+    order = ["FontName", "Fontsize", "PrimaryColour", "BackColour", "Bold",
+             "BorderStyle", "Outline", "Shadow", "Alignment", "MarginL", "MarginR", "MarginV"]
+    head = [
+        "[Script Info]", "ScriptType: v4.00+",
+        f"PlayResX: {width or 1920}", f"PlayResY: {height or 1080}", "",
+        "[V4+ Styles]",
+        ("Format: Name, Fontname, Fontsize, PrimaryColour, BackColour, Bold, "
+         "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV"),
+        "Style: Chapter," + ",".join(style[k] for k in order), "",
+        "[Events]", "Format: Layer, Start, End, Style, Text",
+    ]
+    for i, c in enumerate(chapters, 1):
+        title = c["title"].replace("{", "(").replace("}", ")")
+        label = f"{i}. {title}" if numbered else title
+        head.append(f"Dialogue: 0,{ass_time(c['at'])},{ass_time(c['at'] + hold)},Chapter,"
+                    f"{{\\fad(350,350)}}{label}")
+    Path(path).write_text("\n".join(head) + "\n", encoding="utf-8")
+
+
 # ── 3단계: 자막 입혀 렌더 ─────────────────────────────────────────────────
 def pick_font(explicit):
     if explicit:
@@ -389,6 +481,27 @@ def render(args):
         vf.append(f"subtitles='{escape_for_filter(srt)}':force_style='{force}'")
     else:
         print(f"· 자막 파일이 없어 건너뜁니다 ({srt})")
+
+    chapters = []
+    chapters_file = Path(args.chapters) if args.chapters else None
+    if chapters_file and chapters_file.exists():
+        cuts = out_dir / "cuts.json"
+        basis = args.chapter_basis
+        if basis == "auto":
+            basis = "original" if cuts.exists() else "cut"
+        for c in read_chapters(chapters_file):
+            at = map_to_cut(c["time"], cuts) if basis == "original" else c["time"]
+            chapters.append({"at": at, "title": c["title"]})
+        if basis == "original":
+            print(f"· 챕터 {len(chapters)}개 — 원본 시각을 컷 편집본 기준으로 옮겼습니다")
+        else:
+            print(f"· 챕터 {len(chapters)}개 — 컷 편집본 시각 그대로 씁니다")
+        ass = out_dir / "chapters.ass"
+        write_chapter_ass(chapters, ass, info["width"], info["height"], font,
+                          args.chapter_seconds, not args.no_chapter_numbers)
+        vf.append(f"subtitles='{escape_for_filter(ass)}'")
+    elif args.chapters and args.chapters != "chapters.txt":
+        print(f"· 챕터 파일이 없습니다 ({args.chapters})")
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-loglevel", "warning", "-i", str(src)]
     if vf:
         cmd += ["-vf", ",".join(vf)]
@@ -411,6 +524,21 @@ def render(args):
              "-c", "copy", "-movflags", "+faststart", str(final)])
     else:
         shutil.copy(body, final)
+
+    if chapters:
+        offset = args.intro_seconds if args.title else 0.0
+        lines = ["00:00 " + (args.title or "시작")] if offset else []
+        for i, c in enumerate(chapters, 1):
+            at = c["at"] + offset
+            stamp = hhmmss(at)[3:] if at < 3600 else hhmmss(at)
+            prefix = "" if args.no_chapter_numbers else f"{i}. "
+            line = f"{stamp} {prefix}{c['title']}"
+            if not lines and at > 0:          # 유튜브는 첫 줄이 00:00이어야 받아 준다
+                lines.append("00:00 시작")
+            lines.append(line)
+        yt = out_dir / "youtube_chapters.txt"
+        yt.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        print(f"  유튜브 설명란에 붙일 챕터 목록: {yt}")
 
     print(f"→ {final}  ({hhmmss(probe(final)['duration'])})")
     if srt.exists():
@@ -446,6 +574,11 @@ def main():
     ap.add_argument("--title", default=None, help="제목 카드 문구 (없으면 생략)")
     ap.add_argument("--subtitle", default=None, help="제목 카드 둘째 줄")
     ap.add_argument("--intro-seconds", type=float, default=3.0)
+    ap.add_argument("--chapters", default="chapters.txt", help="챕터 목록 파일")
+    ap.add_argument("--chapter-seconds", type=float, default=4.0, help="소제목이 떠 있는 시간")
+    ap.add_argument("--chapter-basis", choices=["auto", "original", "cut"], default="auto",
+                    help="챕터 시각이 원본 기준인지 컷 편집본 기준인지")
+    ap.add_argument("--no-chapter-numbers", action="store_true", help="소제목 앞 번호를 빼기")
     ap.add_argument("--crf", type=int, default=20, help="화질 (낮을수록 고화질, 18~23)")
     ap.add_argument("--preset", default="medium")
     args = ap.parse_args()
