@@ -26,7 +26,14 @@ SILENCE_DB = -35.0      # 이보다 조용하면 무음으로 본다
 SILENCE_MIN = 0.60      # 이 길이(초) 이상 이어져야 잘라낸다
 PAD = 0.12              # 말 앞뒤로 남길 여유(초). 말꼬리가 잘리는 걸 막는다
 MIN_KEEP = 0.30         # 이보다 짧게 남는 토막은 버린다
-LOUDNESS = "loudnorm=I=-16:TP=-1.5:LRA=11"   # 인강 표준 라우드니스
+# 받아쓰기까지 거치는 소리. 여기엔 잡음 제거를 넣지 않는다. 잡음 제거는 말까지
+# 갉아먹을 수 있어서, 받아쓰기 전에 걸면 통째로 놓치는 말이 생긴다.
+# 고역 통과는 방 웅웅거림만 걷어내는 안전한 처리라 기본으로 넣는다.
+LOUDNESS = "highpass=f=80,loudnorm=I=-16:TP=-1.5:LRA=11"   # 인강 표준 라우드니스
+
+# 최종 렌더에서만 거는 잡음 제거. 작게 녹음된 소리를 크게 끌어올리면 방 소리도
+# 같이 커지는데, 그걸 다시 눌러 준다.
+DENOISE = {"off": None, "light": "afftdn=nr=12:nf=-50", "strong": "afftdn=nr=20:nf=-45"}
 # loudnorm은 출력 표본율을 제멋대로 올린다. 뒤에서 다시 48k 스테레오로 못박아야
 # 제목 카드와 본편을 재인코딩 없이 이어 붙일 수 있다.
 AFORMAT = "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo"
@@ -714,6 +721,10 @@ def render(args):
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-loglevel", "warning", "-i", str(src)]
     if vf:
         cmd += ["-vf", ",".join(vf)]
+    af = DENOISE.get(args.denoise)
+    if af:
+        print(f"· 배경 잡음 누르는 중 ({args.denoise})")
+        cmd += ["-af", af]
     cmd += ["-c:v", "libx264", "-preset", args.preset, "-crf", str(args.crf),
             "-pix_fmt", "yuv420p", *AUDIO_ARGS,
             "-movflags", "+faststart", str(body)]
@@ -783,6 +794,8 @@ def main():
     ap.add_argument("--terms", default="terms.txt", help="전문용어 목록 파일")
     ap.add_argument("--max-chars", type=int, default=SRT_MAX_CHARS)
     ap.add_argument("--font", default=None, help="자막 글꼴 이름")
+    ap.add_argument("--denoise", choices=list(DENOISE), default="off",
+                    help="최종 렌더에서 배경 잡음 누르기. 받아쓰기에는 영향을 주지 않는다")
     ap.add_argument("--sub-size", type=float, default=0.044,
                     help="자막 크기를 화면 높이에 대한 비율로 (0.044 = 1080p 에서 47px)")
     ap.add_argument("--title", default=None, help="제목 카드 문구 (없으면 생략)")
