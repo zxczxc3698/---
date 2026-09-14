@@ -118,7 +118,7 @@ def edit(src, out_dir, job, args):
         ["cut", str(src), "--mode", args.mode, "--minlen", str(args.minlen),
          "--pad", str(args.pad)],
         ["sub", str(out_dir / "01_cut.mp4"), "--model", args.model,
-         "--terms", str(args.terms)],
+         "--terms", str(args.terms), "--glossary", args.glossary],
     ]
     render = ["render", str(out_dir / "01_cut.mp4"), str(out_dir / "subs.srt"),
               "--denoise", args.denoise, "--crf", str(args.crf)]
@@ -156,6 +156,8 @@ def main():
     ap.add_argument("--denoise", choices=["off", "light", "strong"], default="off")
     ap.add_argument("--model", default="medium")
     ap.add_argument("--terms", default=str(HERE / "terms.txt"))
+    ap.add_argument("--glossary", choices=["prompt", "hotwords", "both", "off"],
+                    default="prompt")
     ap.add_argument("--chapter-dir", default=None,
                     help="강의별 챕터 파일이 든 폴더. <번호>.txt 를 찾는다")
     ap.add_argument("--minlen", type=float, default=0.6)

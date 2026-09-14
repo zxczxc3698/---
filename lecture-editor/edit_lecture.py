@@ -462,13 +462,21 @@ def sub(args):
     out_dir = Path(args.out); out_dir.mkdir(parents=True, exist_ok=True)
     dst = out_dir / "subs.srt"
 
-    prompt = None
+    # 용어집을 모델에 건네는 길이 둘이다. 앞말 참조를 껐기 때문에 initial_prompt 는
+    # 첫 구간에만 닿는다. hotwords 는 모든 구간에 닿지만, 되풀이가 심한 음원에서는
+    # 자막이 절반으로 줄어드는 모습을 보였다(내용 유실로 의심된다).
+    # 어느 쪽이 나은지는 실제 강의 음성으로 가려야 해서 고를 수 있게 두었다.
+    prompt = hotwords = None
     if args.terms and Path(args.terms).exists():
         terms = [t.strip() for t in Path(args.terms).read_text(encoding="utf-8").splitlines()
                  if t.strip() and not t.startswith("#")]
         if terms:
-            prompt = "다음 용어가 나옵니다: " + ", ".join(terms) + "."
-            print(f"· 용어집 {len(terms)}개 적용")
+            joined = ", ".join(terms)
+            if args.glossary in ("prompt", "both"):
+                prompt = f"다음 용어가 나옵니다: {joined}."
+            if args.glossary in ("hotwords", "both"):
+                hotwords = joined
+            print(f"· 용어집 {len(terms)}개 적용 ({args.glossary})")
 
     print(f"· 받아쓰기 ({args.model}) — 영상 길이의 0.3~1배쯤 걸립니다")
     model = WhisperModel(args.model, device=args.device, compute_type=args.compute_type)
@@ -479,7 +487,7 @@ def sub(args):
     # 반드시 걸리는 함정이라, 되풀이에 흔들리지 않는 쪽을 기본으로 둔다.
     segments, _ = model.transcribe(
         str(src), language="ko", word_timestamps=True, initial_prompt=prompt,
-        vad_filter=True, beam_size=5,
+        vad_filter=True, beam_size=5, hotwords=hotwords,
         temperature=0.0, condition_on_previous_text=False)
 
     words = []
@@ -800,6 +808,8 @@ def main():
     ap.add_argument("--device", default="auto")
     ap.add_argument("--compute-type", default="default")
     ap.add_argument("--terms", default="terms.txt", help="전문용어 목록 파일")
+    ap.add_argument("--glossary", choices=["prompt", "hotwords", "both", "off"],
+                    default="prompt", help="용어집을 모델에 건네는 방식")
     ap.add_argument("--max-chars", type=int, default=SRT_MAX_CHARS)
     ap.add_argument("--font", default=None, help="자막 글꼴 이름")
     ap.add_argument("--denoise", choices=list(DENOISE), default="off",
