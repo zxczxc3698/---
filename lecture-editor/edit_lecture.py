@@ -472,9 +472,15 @@ def sub(args):
 
     print(f"· 받아쓰기 ({args.model}) — 영상 길이의 0.3~1배쯤 걸립니다")
     model = WhisperModel(args.model, device=args.device, compute_type=args.compute_type)
+    # temperature 를 고정하고 앞말 참조를 끈다. 기본값은 같은 말이 되풀이되면
+    # 무한 루프로 보고 온도를 올려 다시 받아쓰는데, 그 과정에서 멀쩡한 말을
+    # 통째로 버린다. 실측에서 같은 음원에 자막이 12장·59장·106장으로 갈렸고
+    # 정답은 106장이었다. 구호를 함께 외치거나 같은 설명을 되풀이하는 강의에서
+    # 반드시 걸리는 함정이라, 되풀이에 흔들리지 않는 쪽을 기본으로 둔다.
     segments, _ = model.transcribe(
         str(src), language="ko", word_timestamps=True, initial_prompt=prompt,
-        vad_filter=True, beam_size=5)
+        vad_filter=True, beam_size=5,
+        temperature=0.0, condition_on_previous_text=False)
 
     words = []
     for seg in segments:
