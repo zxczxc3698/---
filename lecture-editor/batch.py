@@ -15,6 +15,7 @@
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -79,7 +80,18 @@ def read_list(path):
 
 
 def download(url, dst):
-    """드라이브 링크든 직접 링크든 받아 온다."""
+    """드라이브 링크든 직접 링크든 로컬 파일이든 가져온다."""
+    local = Path(url).expanduser()
+    if local.exists() and local.is_file():
+        dst.unlink(missing_ok=True)
+        try:                               # 같은 디스크면 링크로 족하다. 복사는 낭비다
+            dst.symlink_to(local.resolve())
+        except OSError:
+            shutil.copy2(local, dst)
+        return None
+    if not re.match(r"https?://", url):
+        return f"링크도 파일도 아닙니다: {url[:60]}"
+
     fid = drive_id(url)
     target = (f"https://drive.usercontent.google.com/download?id={fid}"
               f"&export=download&confirm=t") if fid else url
@@ -90,6 +102,8 @@ def download(url, dst):
     if p.returncode != 0:
         return f"내려받기 실패 ({p.stderr.strip()[:120]})"
     if dst.stat().st_size < 100_000:
+        if dst.is_symlink():
+            return None
         head = dst.read_bytes()[:400].decode("utf-8", "ignore")
         if "<html" in head.lower():
             return "링크가 비공개입니다. 「링크가 있는 모든 사용자」로 바꿔 주세요"
@@ -211,6 +225,7 @@ def main():
             state[key] = {"done": True, "out": str(final)}
             if not args.keep_source:
                 src.unlink(missing_ok=True)   # 디스크가 좁다. 끝난 원본은 비운다
+                # 링크였다면 링크만 사라진다. 선생님 원본 파일은 그대로다
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=1),
                               encoding="utf-8")
 

@@ -348,8 +348,10 @@ def finish_cut(src, segs, info, out_dir, args):
            "-i", str(src), "-filter_complex_script", str(filter_path)]
     if info["has_video"]:
         cmd += ["-map", "[v]"]
+    # 중간 파일은 어차피 렌더에서 다시 인코딩된다. 여기서 시간을 들일 까닭이 없다.
+    # 대신 crf 를 낮춰 두어 두 번 거치며 화질이 눈에 띄게 상하지 않게 한다.
     cmd += ["-map", "[a]",
-            "-c:v", "libx264", "-preset", args.preset, "-crf", str(args.crf),
+            "-c:v", "libx264", "-preset", args.cut_preset, "-crf", str(args.cut_crf),
             "-pix_fmt", "yuv420p", *AUDIO_ARGS,
             "-movflags", "+faststart", str(dst)]
     print("· 컷 편집 중…")
@@ -807,7 +809,11 @@ def main():
                     help="챕터 시각이 원본 기준인지 컷 편집본 기준인지")
     ap.add_argument("--no-chapter-numbers", action="store_true", help="소제목 앞 번호를 빼기")
     ap.add_argument("--crf", type=int, default=20, help="화질 (낮을수록 고화질, 18~23)")
-    ap.add_argument("--preset", default="medium")
+    ap.add_argument("--preset", default="medium", help="최종 렌더 인코딩 설정")
+    ap.add_argument("--cut-preset", default="veryfast",
+                    help="중간 파일 인코딩 설정. 어차피 다시 인코딩되므로 빠르게")
+    ap.add_argument("--cut-crf", type=int, default=18,
+                    help="중간 파일 화질. 두 번 인코딩되므로 원본보다 넉넉하게")
     ap.add_argument("--scale", type=int, default=None,
                     help="세로 해상도를 이 값으로 줄여서 뽑는다 (예: 720). 전달용 용량 줄이기")
     args = ap.parse_args()
