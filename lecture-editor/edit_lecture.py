@@ -680,7 +680,8 @@ def escape_for_filter(path):
     return s.replace("\\", "\\\\\\\\").replace(":", "\\\\:").replace("'", "\\\\'")
 
 
-def make_intro(title, subtitle, out_dir, width, height, fps, seconds, font, preset, crf):
+def make_intro(title, subtitle, out_dir, width, height, fps, seconds, font, preset, crf,
+               aargs=None):
     """제목 카드. 본편과 같은 코덱·해상도로 뽑아야 이어 붙일 때 다시 인코딩하지 않는다."""
     dst = out_dir / "00_intro.mp4"
     esc = lambda t: t.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\u2019")
@@ -696,7 +697,8 @@ def make_intro(title, subtitle, out_dir, width, height, fps, seconds, font, pres
          "-f", "lavfi", "-i", f"anullsrc=r=48000:cl=stereo:d={seconds}",
          "-vf", draw, "-shortest",
          "-c:v", "libx264", "-preset", preset, "-crf", str(crf), "-pix_fmt", "yuv420p",
-         *AUDIO_ARGS, str(dst)])
+         # 본편과 소리 규격이 어긋나면 이어 붙일 때 깨진다. 앞서 표본율에서 겪었다.
+         *(aargs or AUDIO_ARGS), str(dst)])
     return dst
 
 
@@ -785,8 +787,9 @@ def render(args):
         passlog = str(out_dir / "pass")
         common = ["-c:v", "libx264", "-preset", args.preset, "-b:v", rate,
                   "-pix_fmt", "yuv420p", "-passlogfile", passlog]
-        run(cmd[:-1] + common + ["-pass", "1", "-an", "-f", "mp4", "-y", os.devnull])
-        run(cmd[:-1] + common + ["-pass", "2", *aargs, "-movflags", "+faststart", str(body)])
+        # cmd 끝에는 아직 출력 파일이 없다. 필터 값이 마지막이라 잘라내면 안 된다.
+        run(cmd + common + ["-pass", "1", "-an", "-f", "mp4", "-y", os.devnull])
+        run(cmd + common + ["-pass", "2", *aargs, "-movflags", "+faststart", str(body)])
         for junk in Path(out_dir).glob("pass*"):
             junk.unlink(missing_ok=True)
     else:
@@ -800,7 +803,7 @@ def render(args):
         print("· 제목 카드 붙이는 중")
         intro = make_intro(args.title, args.subtitle, out_dir,
                            width or 1920, height or 1080, info["fps"],
-                           args.intro_seconds, font, args.preset, args.crf)
+                           args.intro_seconds, font, args.preset, args.crf, aargs)
         listing = out_dir / "concat.txt"
         listing.write_text("".join(f"file '{p.resolve().as_posix()}'\n" for p in (intro, body)),
                            encoding="utf-8")
