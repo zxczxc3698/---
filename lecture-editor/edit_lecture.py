@@ -39,6 +39,31 @@ DENOISE = {"off": None, "light": "afftdn=nr=12:nf=-50", "strong": "afftdn=nr=20:
 AFORMAT = "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo"
 AUDIO_ARGS = ["-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2"]
 
+
+def is_dual_mono(path):
+    """좌우가 똑같은 가짜 스테레오인지. 휴대폰·태블릿 녹음이 흔히 그렇다."""
+    try:
+        import numpy as np
+    except ImportError:
+        return False
+    p = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(path), "-t", "120",
+         "-f", "s16le", "-acodec", "pcm_s16le", "-ac", "2", "-"],
+        capture_output=True)
+    if p.returncode != 0 or len(p.stdout) < 4000:
+        return False
+    x = np.frombuffer(p.stdout, dtype=np.int16)
+    x = x[:len(x) // 2 * 2].reshape(-1, 2).astype(np.float32)
+    level = np.abs(x).mean()
+    return level > 0 and np.abs(x[:, 0] - x[:, 1]).mean() < level * 0.02
+
+
+def audio_args(path, bitrate=None):
+    """가짜 스테레오면 모노로 담는다. 같은 소리를 두 번 담을 까닭이 없다."""
+    mono = is_dual_mono(path)
+    rate = bitrate or ("96k" if mono else "160k")
+    return ["-c:a", "aac", "-b:a", rate, "-ar", "48000", "-ac", "1" if mono else "2"], mono
+
 SRT_MAX_CHARS = 20      # 자막 한 줄 최대 글자수(한글 기준)
 SRT_MAX_LINES = 2
 SRT_MAX_DUR = 6.0       # 자막 한 장이 머무는 최대 시간(초)
@@ -743,10 +768,32 @@ def render(args):
     if af:
         print(f"· 배경 잡음 누르는 중 ({args.denoise})")
         cmd += ["-af", af]
-    cmd += ["-c:v", "libx264", "-preset", args.preset, "-crf", str(args.crf),
-            "-pix_fmt", "yuv420p", *AUDIO_ARGS,
-            "-movflags", "+faststart", str(body)]
-    run(cmd)
+
+    aargs, mono = audio_args(src, args.audio_bitrate)
+    if mono:
+        print("· 좌우가 똑같은 소리라 모노로 담습니다 (용량을 화질에 돌립니다)")
+
+    if args.target_mb:
+        # 용량을 못박고 뽑는다. 주고받을 수 있는 크기가 정해져 있을 때.
+        secs = info["duration"] + (args.intro_seconds if args.title else 0)
+        abits = int(aargs[aargs.index("-b:a") + 1].rstrip("k")) * 1000
+        vbits = (args.target_mb * 8_000_000 - abits * secs) / secs * 0.97   # 컨테이너 여유
+        if vbits < 200_000:
+            raise SystemExit(f"{args.target_mb}MB 로는 이 길이를 담을 수 없습니다.")
+        rate = f"{int(vbits / 1000)}k"
+        print(f"· {args.target_mb}MB 에 맞춰 두 번 훑어 뽑습니다 (영상 {rate})")
+        passlog = str(out_dir / "pass")
+        common = ["-c:v", "libx264", "-preset", args.preset, "-b:v", rate,
+                  "-pix_fmt", "yuv420p", "-passlogfile", passlog]
+        run(cmd[:-1] + common + ["-pass", "1", "-an", "-f", "mp4", "-y", os.devnull])
+        run(cmd[:-1] + common + ["-pass", "2", *aargs, "-movflags", "+faststart", str(body)])
+        for junk in Path(out_dir).glob("pass*"):
+            junk.unlink(missing_ok=True)
+    else:
+        cmd += ["-c:v", "libx264", "-preset", args.preset, "-crf", str(args.crf),
+                "-pix_fmt", "yuv420p", *aargs,
+                "-movflags", "+faststart", str(body)]
+        run(cmd)
 
     final = out_dir / "final.mp4"
     if args.title:
@@ -832,6 +879,10 @@ def main():
                     help="중간 파일 인코딩 설정. 어차피 다시 인코딩되므로 빠르게")
     ap.add_argument("--cut-crf", type=int, default=18,
                     help="중간 파일 화질. 두 번 인코딩되므로 원본보다 넉넉하게")
+    ap.add_argument("--target-mb", type=float, default=None,
+                    help="결과물을 이 용량(MB)에 맞춰 뽑는다. 두 번 훑어서 정확히 맞춘다")
+    ap.add_argument("--audio-bitrate", default=None,
+                    help="소리 비트레이트. 기본은 모노 96k / 스테레오 160k")
     ap.add_argument("--flip", action="store_true",
                     help="좌우 반전을 바로잡는다. 전면 카메라로 찍어 판서가 거울상일 때")
     ap.add_argument("--scale", type=int, default=None,
