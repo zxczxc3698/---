@@ -138,7 +138,8 @@ def main():
                    ("보통 — 확인용", "mid")], default=1)
 
     out = folder / "편집결과"
-    listing = folder / "_목록.txt"
+    out.mkdir(parents=True, exist_ok=True)
+    listing = out / "_목록.txt"      # 선생님 영상 폴더에 남의 파일을 만들지 않는다
     listing.write_text(
         "\n".join(f"{v} | {v.stem}" for v in videos) + "\n", encoding="utf-8")
 
