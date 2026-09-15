@@ -126,6 +126,8 @@ def edit(src, out_dir, job, args):
         render += ["--title", args.course, "--subtitle", job["title"]]
     if args.scale:
         render += ["--scale", str(args.scale)]
+    if args.flip:
+        render += ["--flip"]
     if args.font:
         render += ["--font", args.font]
     chapters = args.chapter_dir and Path(args.chapter_dir) / f"{job['slug']}.txt"
@@ -163,6 +165,7 @@ def main():
     ap.add_argument("--minlen", type=float, default=0.6)
     ap.add_argument("--pad", type=float, default=0.12)
     ap.add_argument("--scale", type=int, default=None)
+    ap.add_argument("--flip", action="store_true", help="좌우 반전 바로잡기")
     ap.add_argument("--crf", type=int, default=20)
     ap.add_argument("--font", default=None)
     ap.add_argument("--keep-source", action="store_true",

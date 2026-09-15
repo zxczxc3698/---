@@ -690,6 +690,11 @@ def render(args):
     height = info["height"]
     width = info["width"]
     prescale = []
+    if args.flip:
+        # 전면 카메라로 찍으면 화면이 좌우로 뒤집힌다. 판서 글씨가 거울상이 된다.
+        # 자막을 태우기 전에 되돌려야 자막까지 뒤집히지 않는다.
+        prescale.append("hflip")
+        print("· 좌우 뒤집힌 화면을 바로잡습니다")
     if args.scale and info["height"] and args.scale < info["height"]:
         width = int(info["width"] * args.scale / info["height"]) // 2 * 2
         height = args.scale
@@ -830,6 +835,8 @@ def main():
                     help="중간 파일 인코딩 설정. 어차피 다시 인코딩되므로 빠르게")
     ap.add_argument("--cut-crf", type=int, default=18,
                     help="중간 파일 화질. 두 번 인코딩되므로 원본보다 넉넉하게")
+    ap.add_argument("--flip", action="store_true",
+                    help="좌우 반전을 바로잡는다. 전면 카메라로 찍어 판서가 거울상일 때")
     ap.add_argument("--scale", type=int, default=None,
                     help="세로 해상도를 이 값으로 줄여서 뽑는다 (예: 720). 전달용 용량 줄이기")
     args = ap.parse_args()
