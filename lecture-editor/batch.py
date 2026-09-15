@@ -159,7 +159,7 @@ def main():
     ap.add_argument("--model", default="medium")
     ap.add_argument("--terms", default=str(HERE / "terms.txt"))
     ap.add_argument("--glossary", choices=["prompt", "hotwords", "both", "off"],
-                    default="prompt")
+                    default="hotwords")
     ap.add_argument("--chapter-dir", default=None,
                     help="강의별 챕터 파일이 든 폴더. <번호>.txt 를 찾는다")
     ap.add_argument("--minlen", type=float, default=0.6)

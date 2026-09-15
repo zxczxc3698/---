@@ -460,9 +460,9 @@ def sub(args):
     dst = out_dir / "subs.srt"
 
     # 용어집을 모델에 건네는 길이 둘이다. 앞말 참조를 껐기 때문에 initial_prompt 는
-    # 첫 구간에만 닿는다. hotwords 는 모든 구간에 닿지만, 되풀이가 심한 음원에서는
-    # 자막이 절반으로 줄어드는 모습을 보였다(내용 유실로 의심된다).
-    # 어느 쪽이 나은지는 실제 강의 음성으로 가려야 해서 고를 수 있게 두었다.
+    # 첫 구간에만 닿아 뒤쪽 용어를 못 잡는다. hotwords 는 모든 구간에 닿는다.
+    # 실제 강의 한 편으로 견줘 보니 hotwords 가 지텔프·G-TELP·CCT 를 모두 바로잡았고
+    # 내용도 줄지 않았다(1042자 대 1045자). 그래서 hotwords 를 기본으로 둔다.
     prompt = hotwords = None
     if args.terms and Path(args.terms).exists():
         terms = [t.strip() for t in Path(args.terms).read_text(encoding="utf-8").splitlines()
@@ -811,7 +811,7 @@ def main():
     ap.add_argument("--compute-type", default="default")
     ap.add_argument("--terms", default="terms.txt", help="전문용어 목록 파일")
     ap.add_argument("--glossary", choices=["prompt", "hotwords", "both", "off"],
-                    default="prompt", help="용어집을 모델에 건네는 방식")
+                    default="hotwords", help="용어집을 모델에 건네는 방식")
     ap.add_argument("--max-chars", type=int, default=SRT_MAX_CHARS)
     ap.add_argument("--font", default=None, help="자막 글꼴 이름")
     ap.add_argument("--denoise", choices=list(DENOISE), default="off",
