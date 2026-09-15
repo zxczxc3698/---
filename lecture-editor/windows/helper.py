@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """윈도우에서 명령어 없이 쓰는 창구.
 
-2_편집하기.bat 을 두 번 눌러 쓰거나, 영상이 든 폴더를 그 위에 끌어다 놓는다.
+edit.bat 을 두 번 눌러 쓰거나, 영상이 든 폴더를 그 위에 끌어다 놓는다.
 """
 
 import subprocess
@@ -44,7 +44,7 @@ def check():
             ver = p.stdout.splitlines()[0].split()[2] if p.returncode == 0 else "?"
             say(f"  [O] {name} {ver}")
         except (OSError, subprocess.SubprocessError):
-            say(f"  [X] {name} 없음 — 1_설치.bat 을 먼저 실행하세요")
+            say(f"  [X] {name} 없음 — setup.bat 을 먼저 실행하세요")
             ok = False
 
     say(f"  [O] 파이썬 {sys.version.split()[0]}")
@@ -53,7 +53,7 @@ def check():
         import faster_whisper          # noqa: F401
         say("  [O] 받아쓰기 엔진")
     except ImportError:
-        say("  [X] 받아쓰기 엔진 없음 — 1_설치.bat 을 먼저 실행하세요")
+        say("  [X] 받아쓰기 엔진 없음 — setup.bat 을 먼저 실행하세요")
         ok = False
         return ok
 
@@ -69,7 +69,7 @@ def check():
         say("      오래된 CPU 라면 여기서 막힙니다. 자막 없이 컷 편집만은 됩니다.")
         ok = False
 
-    say("\n" + ("준비 끝났습니다. 2_편집하기.bat 을 실행하세요."
+    say("\n" + ("준비 끝났습니다. edit.bat 을 실행하세요."
                 if ok else "위 항목을 해결한 뒤 다시 확인하세요."))
     return ok
 
