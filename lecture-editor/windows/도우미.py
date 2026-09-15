@@ -133,6 +133,14 @@ def main():
     mode = ask("어떻게 잘라낼까요?",
                [("조용한 구간을 잘라낸다 — 앉아서 말하는 강의", "sound"),
                 ("사람 목소리만 남긴다 — 움직이며 찍은 영상", "speech")], default=1)
+    say("\n영상 앞에 3초짜리 제목 카드를 붙일 수 있습니다.")
+    say("강의 전체를 묶는 이름을 넣으세요. (예: 특수부대 합격 로드맵)")
+    say("그냥 엔터를 치면 제목 카드를 넣지 않습니다.")
+    course = input("강의 이름: ").strip()
+    if course:
+        say(f"  제목 카드 윗줄: {course}")
+        say(f"  아랫줄에는 파일 이름이 들어갑니다 (예: {videos[0].stem})")
+
     quality = ask("화질은 어떻게 할까요?",
                   [("높게 — 유튜브에 올릴 것 (파일이 큽니다)", "high"),
                    ("보통 — 확인용", "mid")], default=1)
@@ -141,10 +149,13 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     listing = out / "_목록.txt"      # 선생님 영상 폴더에 남의 파일을 만들지 않는다
     listing.write_text(
-        "\n".join(f"{v} | {v.stem}" for v in videos) + "\n", encoding="utf-8")
+        "\n".join(f"{v} | {v.stem}" if course else str(v) for v in videos) + "\n",
+        encoding="utf-8")
 
     cmd = [sys.executable, str(BATCH), str(listing), "-o", str(out),
            "--mode", mode, "--denoise", "light"]
+    if course:
+        cmd += ["--course", course]
     if flip:
         cmd.append("--flip")
     cmd += (["--preset", "slow", "--crf", "20"] if quality == "high"

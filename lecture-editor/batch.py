@@ -123,8 +123,10 @@ def edit(src, out_dir, job, args):
     ]
     render = ["render", str(out_dir / "01_cut.mp4"), str(out_dir / "subs.srt"),
               "--denoise", args.denoise, "--crf", str(args.crf)]
-    if job["title"]:
-        render += ["--title", args.course, "--subtitle", job["title"]]
+    if args.course:
+        render += ["--title", args.course]
+        if job["title"]:
+            render += ["--subtitle", job["title"]]
     if args.scale:
         render += ["--scale", str(args.scale)]
     if args.flip:
@@ -158,7 +160,8 @@ def main():
                     help="공개된 드라이브 폴더 링크. 안에 든 영상을 모두 처리한다")
     ap.add_argument("-o", "--out", default="결과", help="결과를 모을 폴더")
     ap.add_argument("--work", default=None, help="내려받은 원본을 둘 곳")
-    ap.add_argument("--course", default="특수부대 합격 로드맵", help="제목 카드 첫 줄")
+    ap.add_argument("--course", default=None,
+                    help="제목 카드 첫 줄. 주지 않으면 제목 카드를 넣지 않는다")
     ap.add_argument("--mode", choices=["sound", "speech"], default="sound")
     ap.add_argument("--denoise", choices=["off", "light", "strong"], default="off")
     ap.add_argument("--model", default="medium")
