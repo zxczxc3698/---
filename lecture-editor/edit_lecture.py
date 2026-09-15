@@ -413,19 +413,16 @@ def cues_from_words(words, max_chars, max_lines, max_dur):
             buf.clear()
 
     for i, w in enumerate(words):
-        buf.append(w)
-        # 한 장에 안 들어가면 이 낱말은 다음 장으로 넘긴다
-        if len(buf) > 1 and not fits(text_of(buf), max_chars, max_lines):
-            buf.pop()
+        # 넣기 전에 따진다. 넣고 나서 따지면 늘 한 낱말씩 넘친 자막이 나온다.
+        if buf and (w["end"] - buf[0]["start"] > max_dur
+                    or not fits(text_of(buf + [w]), max_chars, max_lines)):
             flush()
-            buf.append(w)
+        buf.append(w)
 
         text = text_of(buf)
-        dur = buf[-1]["end"] - buf[0]["start"]
         gap = words[i + 1]["start"] - w["end"] if i + 1 < len(words) else 99.0
         ends_sentence = text.endswith((".", "?", "!", "…", "다", "요", "죠", "까", "야"))
-        if (dur >= max_dur                       # 너무 오래 머무른 자막
-                or gap > 0.7                     # 확실히 쉬어 간 자리
+        if (gap > 0.7                            # 확실히 쉬어 간 자리
                 or (ends_sentence and gap > 0.25)):   # 문장이 끝나고 숨을 돌린 자리
             flush()
     flush()
